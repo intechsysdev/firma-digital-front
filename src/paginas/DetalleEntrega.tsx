@@ -153,18 +153,39 @@ export function DetalleEntrega() {
           <div className="panel-barra">
             <span className="rotulo">Acta en PDF</span>
             {pdf && (
-              <a
-                className="boton boton-secundario boton-chico"
-                href={pdf}
-                download={`acta-${entrega.entregaUid.slice(0, 8)}.pdf`}
-              >
-                Descargar
-              </a>
+              <span className="acciones-panel">
+                {/* Salida de emergencia: si el navegador está configurado para descargar los PDF
+                    en vez de abrirlos, el visor incrustado queda en blanco y este enlace es la
+                    única forma de ver el acta sin salir de la consola. */}
+                <a className="boton boton-secundario boton-chico" href={pdf} target="_blank" rel="noreferrer">
+                  Abrir aparte
+                </a>
+                <a
+                  className="boton boton-secundario boton-chico"
+                  href={pdf}
+                  download={`acta-${entrega.entregaUid.slice(0, 8)}.pdf`}
+                >
+                  Descargar
+                </a>
+              </span>
             )}
           </div>
 
           {pdf ? (
-            <iframe className="marco-pdf" src={pdf} title={`Acta de ${entrega.nombreAsociadoFirmante}`} />
+            /* <object> y no <iframe>: cuando el navegador no sabe o no quiere pintar el PDF,
+               muestra el contenido de dentro en vez de dejar un marco vacío sin explicación. */
+            <object className="marco-pdf" data={pdf} type="application/pdf" aria-label={`Acta de ${entrega.nombreAsociadoFirmante}`}>
+              <div className="vacio">
+                <h2>Tu navegador no muestra el PDF aquí</h2>
+                <p>
+                  Chrome en macOS suele venir con la opción de descargar los PDF en vez de abrirlos.
+                  El acta está bien guardada: ábrela aparte o descárgala.
+                </p>
+                <a className="boton boton-primario" href={pdf} target="_blank" rel="noreferrer">
+                  Abrir el acta aparte
+                </a>
+              </div>
+            </object>
           ) : (
             <div className="panel-cuerpo">
               <div className="vacio">

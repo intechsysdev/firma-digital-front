@@ -376,3 +376,8 @@ body {
 
 .vacio { text-align: center; padding: 56px 20px; color: var(--tinta-suave); }
 .vacio h2 { font-family: var(--display); font-size: 18px; color: var(--tinta); margin: 0 0 6px; }
+
+.acciones-panel { display: inline-flex; gap: 8px; }
+/* El contenido alternativo del <object> necesita respirar: sin esto se pega a los bordes del
+   panel, porque no pasa por .panel-cuerpo. */
+object.marco-pdf > .vacio { padding: 48px 24px; }
