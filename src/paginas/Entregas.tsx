@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { contarPorEstado, listarEntregas } from "../api/entregas";
-import type { Entrega, FiltrosEntregas, Pagina } from "../api/tipos";
+import { listarEmpresas } from "../api/administracion";
+import { useSesion } from "../sesion/SesionContexto";
+import type { Empresa, Entrega, FiltrosEntregas, Pagina } from "../api/tipos";
 import { Aviso, Cargando } from "../componentes/Cargando";
 import { EtiquetaEstado, fechaCorta, hora } from "../componentes/Etiquetas";
 
@@ -15,7 +17,10 @@ interface Resumen {
 }
 
 export function Entregas() {
+  const { esSuperAdministrador } = useSesion();
+
   const [filtros, setFiltros] = useState<FiltrosEntregas>(VACIOS);
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [datos, setDatos] = useState<Pagina<Entrega> | null>(null);
   const [resumen, setResumen] = useState<Resumen | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -38,23 +43,30 @@ export function Entregas() {
     void cargar(filtros);
   }, [cargar, filtros]);
 
+  useEffect(() => {
+    if (!esSuperAdministrador) return;
+    void listarEmpresas().then(setEmpresas).catch(() => setEmpresas([]));
+  }, [esSuperAdministrador]);
+
   // El resumen es del total, no de la página ni de los filtros: es el contexto contra el que
   // se leen los filtros, así que cambiarlos no debe moverlo.
   useEffect(() => {
+    const empresaId = filtros.empresaId;
+
     void (async () => {
       try {
         const [total, sincronizadas, pendientes, conError] = await Promise.all([
-          listarEntregas({ pagina: 1, tamanoPagina: 1 }).then((p) => p.total),
-          contarPorEstado("SINCRONIZADO"),
-          contarPorEstado("FIRMADO"),
-          contarPorEstado("ERROR_SINCRONIZACION"),
+          listarEntregas({ empresaId, pagina: 1, tamanoPagina: 1 }).then((p) => p.total),
+          contarPorEstado("SINCRONIZADO", empresaId),
+          contarPorEstado("FIRMADO", empresaId),
+          contarPorEstado("ERROR_SINCRONIZACION", empresaId),
         ]);
         setResumen({ total, sincronizadas, pendientes, conError });
       } catch {
         setResumen(null);
       }
     })();
-  }, []);
+  }, [filtros.empresaId]);
 
   function cambiar(campo: keyof FiltrosEntregas, valor: string) {
     // Cualquier filtro nuevo vuelve a la primera página: si no, se queda pidiendo la página 4
@@ -63,7 +75,9 @@ export function Entregas() {
   }
 
   const paginas = datos ? Math.max(1, Math.ceil(datos.total / datos.tamanoPagina)) : 1;
-  const hayFiltros = Boolean(filtros.busqueda || filtros.desde || filtros.hasta || filtros.estadoProceso);
+  const hayFiltros = Boolean(
+    filtros.busqueda || filtros.desde || filtros.hasta || filtros.estadoProceso || filtros.empresaId,
+  );
 
   return (
     <section>
@@ -112,6 +126,28 @@ export function Entregas() {
           <span className="rotulo">Hasta</span>
           <input type="date" className="campo" value={filtros.hasta ?? ""} onChange={(e) => cambiar("hasta", e.target.value)} />
         </label>
+        {esSuperAdministrador && empresas.length > 0 && (
+          <label>
+            <span className="rotulo">Empresa</span>
+            <select
+              className="campo"
+              value={filtros.empresaId ?? ""}
+              onChange={(e) =>
+                setFiltros((previos) => ({
+                  ...previos,
+                  empresaId: e.target.value ? Number(e.target.value) : undefined,
+                  pagina: 1,
+                }))
+              }
+            >
+              <option value="">Todas</option>
+              {empresas.map((empresa) => (
+                <option key={empresa.empresaId} value={empresa.empresaId}>{empresa.nombre}</option>
+              ))}
+            </select>
+          </label>
+        )}
+
         <label>
           <span className="rotulo">Estado</span>
           <select className="campo" value={filtros.estadoProceso ?? ""} onChange={(e) => cambiar("estadoProceso", e.target.value)}>
@@ -148,6 +184,7 @@ export function Entregas() {
                 <th>Cédula</th>
                 <th>Equipo</th>
                 <th>Canal</th>
+                {esSuperAdministrador && <th>Empresa</th>}
                 <th>Estado</th>
                 <th aria-label="Acciones" />
               </tr>
@@ -166,6 +203,7 @@ export function Entregas() {
                     <span className="sub dato">{entrega.imei ?? entrega.deviceId}</span>
                   </td>
                   <td>{entrega.canal ?? "—"}</td>
+                  {esSuperAdministrador && <td>{entrega.empresa ?? "—"}</td>}
                   <td>
                     <EtiquetaEstado estado={entrega.estadoProceso} />
                   </td>

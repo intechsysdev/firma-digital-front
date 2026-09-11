@@ -5,6 +5,8 @@ export type EstadoProceso = "FIRMADO" | "SINCRONIZADO" | "ERROR_SINCRONIZACION";
 export interface Entrega {
   entregaUid: string;
   entregaId: number;
+  empresaId: number;
+  empresa: string | null;
   deviceId: string;
   fabricante: string | null;
   modelo: string | null;
@@ -30,6 +32,7 @@ export interface Pagina<T> {
 
 export interface FiltrosEntregas {
   busqueda?: string;
+  empresaId?: number;
   desde?: string;
   hasta?: string;
   estadoProceso?: string;

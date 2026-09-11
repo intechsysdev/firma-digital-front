@@ -8,6 +8,7 @@ function consulta(filtros: FiltrosEntregas): string {
   if (filtros.desde) partes.set("desde", filtros.desde);
   if (filtros.hasta) partes.set("hasta", filtros.hasta);
   if (filtros.estadoProceso) partes.set("estadoProceso", filtros.estadoProceso);
+  if (filtros.empresaId) partes.set("empresaId", String(filtros.empresaId));
 
   partes.set("pagina", String(filtros.pagina));
   partes.set("tamanoPagina", String(filtros.tamanoPagina));
@@ -31,7 +32,7 @@ export const reintentarSincronizacion = (uid: string) =>
  * Conteo por estado para la tira de resumen. Se pide una página de un solo elemento y se lee
  * el total: el API ya devuelve el conteo filtrado, así que no hace falta traer las filas.
  */
-export async function contarPorEstado(estado: string): Promise<number> {
-  const pagina = await listarEntregas({ estadoProceso: estado, pagina: 1, tamanoPagina: 1 });
+export async function contarPorEstado(estado: string, empresaId?: number): Promise<number> {
+  const pagina = await listarEntregas({ estadoProceso: estado, empresaId, pagina: 1, tamanoPagina: 1 });
   return pagina.total;
 }
