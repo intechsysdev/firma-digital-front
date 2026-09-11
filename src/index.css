@@ -381,3 +381,41 @@ body {
 /* El contenido alternativo del <object> necesita respirar: sin esto se pega a los bordes del
    panel, porque no pasa por .panel-cuerpo. */
 object.marco-pdf > .vacio { padding: 48px 24px; }
+
+/* ---------- Navegación ---------- */
+.navegacion { display: flex; gap: 4px; }
+.navegacion a {
+  padding: 7px 13px;
+  border-radius: var(--radio-sm);
+  font-size: 14px; font-weight: 600;
+  color: var(--tinta-suave);
+  text-decoration: none;
+  transition: background .15s ease, color .15s ease;
+}
+.navegacion a:hover { background: var(--superficie-2); color: var(--tinta); }
+.navegacion a.active { background: var(--acento-tenue); color: var(--acento); }
+@media (max-width: 760px) { .navegacion a { padding: 7px 9px; } }
+
+/* ---------- Formularios de administración ---------- */
+.formulario { margin-bottom: 22px; }
+.rejilla-campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.rejilla-campos label { display: flex; flex-direction: column; gap: 5px; }
+.rejilla-campos .ancho-completo { grid-column: 1 / -1; }
+.nota { margin: 12px 0 0; font-size: 13px; line-height: 1.55; color: var(--tinta-suave); }
+.nota code { font-family: var(--dato); font-size: .92em; background: var(--superficie-2); padding: 1px 5px; border-radius: 4px; }
+.acciones-formulario { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+
+/* ---------- Llave revelada ---------- */
+/* Se muestra una sola vez y no se puede recuperar: el panel tiene que pesar más que el resto
+   de la pantalla o alguien la cerrará sin copiarla. */
+.llave-panel { margin-bottom: 22px; border-color: var(--acento); }
+.llave-aviso { margin: 0 0 14px; font-size: 14px; line-height: 1.6; }
+.llave-aviso code { font-family: var(--dato); background: var(--superficie-2); padding: 1px 5px; border-radius: 4px; }
+.llave-caja {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  background: var(--acento-tenue);
+  border: 1px solid var(--acento);
+  border-radius: var(--radio-sm);
+}
+.llave-valor { flex: 1; word-break: break-all; font-size: 13px; }

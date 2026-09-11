@@ -74,9 +74,13 @@ export async function obtenerJson<T>(ruta: string): Promise<T> {
   return (await respuesta.json()) as T;
 }
 
-export async function enviarJson<T>(ruta: string, cuerpo?: unknown): Promise<T> {
+export async function enviarJson<T>(
+  ruta: string,
+  cuerpo?: unknown,
+  metodo: "POST" | "PUT" | "DELETE" = "POST",
+): Promise<T> {
   const respuesta = await pedir(ruta, {
-    method: "POST",
+    method: metodo,
     headers: cuerpo === undefined ? {} : { "Content-Type": "application/json" },
     body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
   });
