@@ -73,6 +73,11 @@ export interface Empresa {
   mobiControlAtributoFirma: string;
   mobiControlAtributoFecha: string;
   mobiControlTimeoutSegundos: number;
+  correosCopia: string | null;
+  correoConfigurado: boolean;
+  infobipBaseUrl: string | null;
+  infobipRemitente: string | null;
+  infobipNombreRemitente: string | null;
   actas: number;
   fechaCreacion: string;
 }
@@ -95,6 +100,11 @@ export interface EmpresaAlta {
   mobiControlAtributoFirma?: string | null;
   mobiControlAtributoFecha?: string | null;
   mobiControlTimeoutSegundos?: number | null;
+  correosCopia?: string | null;
+  infobipBaseUrl?: string | null;
+  infobipApiKey?: string | null;
+  infobipRemitente?: string | null;
+  infobipNombreRemitente?: string | null;
 }
 
 export interface Usuario {
@@ -114,4 +124,18 @@ export interface UsuarioAlta {
   nombreCompleto?: string | null;
   empresaId?: number | null;
   rol?: Rol;
+}
+
+/** El acta lleva el correo con el que se firmó, para la copia al asociado. */
+export type EstadoEnvio = "PENDIENTE" | "ENVIADO" | "ERROR" | "DESCARTADO";
+
+export interface EnvioCorreo {
+  envioId: number;
+  destinatarios: string;
+  asunto: string;
+  estado: EstadoEnvio;
+  intentos: number;
+  ultimoError: string | null;
+  fechaCreacion: string;
+  fechaEnvio: string | null;
 }

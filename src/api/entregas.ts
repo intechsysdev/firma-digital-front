@@ -1,5 +1,5 @@
 import { enviarJson, obtenerArchivo, obtenerJson } from "./cliente";
-import type { Entrega, FiltrosEntregas, Pagina, ResultadoSincronizacion } from "./tipos";
+import type { Entrega, EnvioCorreo, FiltrosEntregas, Pagina, ResultadoSincronizacion } from "./tipos";
 
 function consulta(filtros: FiltrosEntregas): string {
   const partes = new URLSearchParams();
@@ -36,3 +36,9 @@ export async function contarPorEstado(estado: string, empresaId?: number): Promi
   const pagina = await listarEntregas({ estadoProceso: estado, empresaId, pagina: 1, tamanoPagina: 1 });
   return pagina.total;
 }
+
+export const listarCorreos = (uid: string) =>
+  obtenerJson<EnvioCorreo[]>(`/api/v1/entregas/${uid}/correos`);
+
+export const reenviarCorreo = (uid: string) =>
+  enviarJson<EnvioCorreo[]>(`/api/v1/entregas/${uid}/correos/reenviar`);

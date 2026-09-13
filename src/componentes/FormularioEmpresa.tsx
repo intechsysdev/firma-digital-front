@@ -22,6 +22,11 @@ export function FormularioEmpresa({
     mobiControlAtributoFirma: empresa?.mobiControlAtributoFirma ?? "Firma de entrega",
     mobiControlAtributoFecha: empresa?.mobiControlAtributoFecha ?? "Fecha de entrega",
     mobiControlTimeoutSegundos: empresa?.mobiControlTimeoutSegundos ?? 20,
+    correosCopia: empresa?.correosCopia ?? "",
+    infobipBaseUrl: empresa?.infobipBaseUrl ?? "",
+    infobipApiKey: "",
+    infobipRemitente: empresa?.infobipRemitente ?? "",
+    infobipNombreRemitente: empresa?.infobipNombreRemitente ?? "",
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -122,10 +127,55 @@ export function FormularioEmpresa({
           </label>
         </div>
 
+        <h2>Copia del acta por correo</h2>
+        <p className="nota">
+          Cada acta firmada se manda a estos destinatarios, y además al asociado si su equipo
+          trae el atributo <code>Correo</code> en MobiControl. El envío ocurre aparte de la
+          firma: si el correo falla, el acta ya está guardada y se reintenta sola.
+        </p>
+
+        <div className="rejilla-campos">
+          <label className="ancho-completo">
+            <span className="rotulo">Destinatarios fijos</span>
+            <input className="campo" placeholder="archivo@empresa.com, rrhh@empresa.com"
+              value={datos.correosCopia ?? ""}
+              onChange={(e) => campo("correosCopia", e.target.value)} />
+          </label>
+          <label>
+            <span className="rotulo">URL base de Infobip</span>
+            <input className="campo" placeholder="https://xxxxx.api.infobip.com"
+              value={datos.infobipBaseUrl ?? ""}
+              onChange={(e) => campo("infobipBaseUrl", e.target.value)} />
+          </label>
+          <label>
+            <span className="rotulo">Llave de Infobip</span>
+            <input className="campo" type="password" autoComplete="new-password"
+              placeholder={empresa ? "Sin cambios" : ""}
+              value={datos.infobipApiKey ?? ""}
+              onChange={(e) => campo("infobipApiKey", e.target.value)} />
+          </label>
+          <label>
+            <span className="rotulo">Remitente</span>
+            <input className="campo" type="email" placeholder="actas@empresa.com"
+              value={datos.infobipRemitente ?? ""}
+              onChange={(e) => campo("infobipRemitente", e.target.value)} />
+          </label>
+          <label>
+            <span className="rotulo">Nombre del remitente</span>
+            <input className="campo" placeholder="Actas de entrega"
+              value={datos.infobipNombreRemitente ?? ""}
+              onChange={(e) => campo("infobipNombreRemitente", e.target.value)} />
+          </label>
+        </div>
+        <p className="nota">
+          El dominio del remitente tiene que estar verificado en la cuenta de Infobip, o el
+          envío se rechaza.
+        </p>
+
         {empresa && (
           <p className="nota">
-            El secreto y la contraseña no se muestran nunca. Déjalos vacíos para conservar los
-            que ya están guardados.
+            Las contraseñas y llaves no se muestran nunca. Déjalas vacías para conservar las que
+            ya están guardadas.
           </p>
         )}
 

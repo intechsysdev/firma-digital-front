@@ -1,9 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { descargarFirma, descargarPdf, obtenerEntrega, reintentarSincronizacion } from "../api/entregas";
-import type { Entrega, ResultadoSincronizacion } from "../api/tipos";
+import {
+  descargarFirma, descargarPdf, listarCorreos, obtenerEntrega, reenviarCorreo, reintentarSincronizacion,
+} from "../api/entregas";
+import type { Entrega, EnvioCorreo, ResultadoSincronizacion } from "../api/tipos";
 import { Aviso, Cargando } from "../componentes/Cargando";
 import { EtiquetaEstado, fecha } from "../componentes/Etiquetas";
+
+const ESTADOS_CORREO: Record<string, string> = {
+  PENDIENTE: "En cola",
+  ENVIADO: "Enviada",
+  ERROR: "Falló, se reintenta",
+  DESCARTADO: "Se agotaron los intentos",
+};
 
 export function DetalleEntrega() {
   const { uid = "" } = useParams();
@@ -15,6 +24,8 @@ export function DetalleEntrega() {
   const [cargando, setCargando] = useState(true);
   const [sincronizando, setSincronizando] = useState(false);
   const [resultados, setResultados] = useState<ResultadoSincronizacion[] | null>(null);
+  const [correos, setCorreos] = useState<EnvioCorreo[]>([]);
+  const [reenviando, setReenviando] = useState(false);
 
   const cargar = useCallback(async () => {
     setCargando(true);
@@ -32,6 +43,7 @@ export function DetalleEntrega() {
     // haber perdido el archivo y aun así interesa ver sus datos.
     try { setPdf(await descargarPdf(uid)); } catch { setPdf(null); }
     try { setFirma(await descargarFirma(uid)); } catch { setFirma(null); }
+    try { setCorreos(await listarCorreos(uid)); } catch { setCorreos([]); }
 
     setCargando(false);
   }, [uid]);
@@ -115,6 +127,48 @@ export function DetalleEntrega() {
                 <img className="firma" src={firma} alt={`Firma de ${entrega.nombreAsociadoFirmante}`} />
               ) : (
                 <Aviso tipo="info">La imagen de la firma no está en el servidor.</Aviso>
+              )}
+            </div>
+          </div>
+
+          <div className="panel">
+            <div className="panel-barra">
+              <span className="rotulo">Copia por correo</span>
+              <button
+                type="button"
+                className="boton boton-secundario boton-chico"
+                disabled={reenviando}
+                onClick={async () => {
+                  setReenviando(true);
+                  try {
+                    setCorreos(await reenviarCorreo(uid));
+                  } catch (e) {
+                    setError(e instanceof Error ? e.message : "No se pudo reenviar.");
+                  } finally {
+                    setReenviando(false);
+                  }
+                }}
+              >
+                {reenviando ? "Encolando…" : "Reenviar"}
+              </button>
+            </div>
+            <div className="panel-cuerpo">
+              {correos.length === 0 ? (
+                <p className="nota" style={{ marginTop: 0 }}>
+                  No se encoló ninguna copia. Suele ser que la empresa no tiene destinatarios
+                  configurados y el equipo no trajo el atributo <code>Correo</code>.
+                </p>
+              ) : (
+                <ul className="resultados">
+                  {correos.map((envio) => (
+                    <li key={envio.envioId} className={envio.estado === "ENVIADO" ? "ok" : envio.estado === "PENDIENTE" ? "" : "falla"}>
+                      <strong>{ESTADOS_CORREO[envio.estado] ?? envio.estado}</strong>
+                      {envio.intentos > 1 ? ` · ${envio.intentos} intentos` : ""}
+                      <span className="sub">{envio.destinatarios}</span>
+                      {envio.ultimoError && <span className="sub">{envio.ultimoError}</span>}
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
           </div>
