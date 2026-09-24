@@ -419,3 +419,7 @@ object.marco-pdf > .vacio { padding: 48px 24px; }
   border-radius: var(--radio-sm);
 }
 .llave-valor { flex: 1; word-break: break-all; font-size: 13px; }
+
+/* El selector de empresa solo aparece cuando hay más de una: no debe dominar la barra. */
+.selector-empresa { max-width: 200px; font-size: 13px; padding: 6px 9px; }
+@media (max-width: 760px) { .selector-empresa { max-width: 130px; } }

@@ -1,17 +1,19 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { avisarAlPerderSesion, iniciarSesion } from "../api/cliente";
-import { obtenerIdentidad } from "../api/administracion";
-import type { Identidad } from "../api/tipos";
-import { borrarSesion, leerSesion } from "../api/sesionAlmacenada";
+import { borrarSesion, fijarTenant, leerSesion } from "../api/sesionAlmacenada";
+import { obtenerSesion } from "../api/plataforma";
+import type { EmpresaAccesible, Sesion } from "../api/plataforma";
 
 interface Contexto {
   correo: string | null;
   autenticado: boolean;
-  /** Null mientras se consulta. La consola espera antes de decidir qué módulos mostrar. */
-  identidad: Identidad | null;
-  esSuperAdministrador: boolean;
+  /** Null mientras se consulta. La consola espera antes de decidir qué mostrar. */
+  sesion: Sesion | null;
+  empresaActiva: EmpresaAccesible | null;
+  esAdministradorPlataforma: boolean;
   entrar: (correo: string, clave: string) => Promise<void>;
+  cambiarEmpresa: (tenantId: string) => void;
   salir: () => void;
 }
 
@@ -19,52 +21,67 @@ const SesionContexto = createContext<Contexto | null>(null);
 
 export function ProveedorSesion({ children }: { children: ReactNode }) {
   const [correo, setCorreo] = useState<string | null>(() => leerSesion()?.correo ?? null);
-
-  const [identidad, setIdentidad] = useState<Identidad | null>(null);
+  const [sesion, setSesion] = useState<Sesion | null>(null);
+  const [tenantId, setTenantId] = useState<string | null>(() => leerSesion()?.tenantId ?? null);
 
   const salir = useCallback(() => {
     borrarSesion();
     setCorreo(null);
-    setIdentidad(null);
+    setSesion(null);
+    setTenantId(null);
   }, []);
 
-  // El rol no viaja en el estado local: se pregunta al API. Si se guardara junto a la sesión,
-  // bastaría editarlo en el navegador para que la consola mostrara módulos que no corresponden
-  // —el API los seguiría rechazando, pero la interfaz mentiría.
+  useEffect(() => avisarAlPerderSesion(() => { setCorreo(null); setSesion(null); }), []);
+
+  // Quién es y a qué empresas alcanza lo responde el API de actas, no el token: el token trae
+  // los identificadores de One, pero no sus nombres ni cuáles están vinculadas a este sistema.
   useEffect(() => {
-    if (correo === null) {
-      setIdentidad(null);
-      return;
-    }
+    if (correo === null) return;
 
     let vigente = true;
-    void obtenerIdentidad()
-      .then((datos) => { if (vigente) setIdentidad(datos); })
-      .catch(() => { if (vigente) setIdentidad(null); });
+
+    void obtenerSesion()
+      .then((datos) => {
+        if (!vigente) return;
+        setSesion(datos);
+
+        // Con una sola empresa no tiene sentido pedir que la elija.
+        const guardado = leerSesion()?.tenantId ?? null;
+        const valida = datos.empresas.some((e) => e.oneTenantId === guardado);
+        const elegida = valida ? guardado : datos.empresas.length === 1 ? datos.empresas[0].oneTenantId : null;
+
+        setTenantId(elegida);
+        fijarTenant(elegida);
+      })
+      .catch(() => { if (vigente) setSesion(null); });
 
     return () => { vigente = false; };
   }, [correo]);
-
-  // El cliente HTTP avisa cuando el token dejó de servir y no se pudo renovar, para que la
-  // consola vuelva al login en vez de quedarse mostrando tablas vacías.
-  useEffect(() => avisarAlPerderSesion(() => setCorreo(null)), []);
 
   const entrar = useCallback(async (nuevoCorreo: string, clave: string) => {
     await iniciarSesion(nuevoCorreo, clave);
     setCorreo(nuevoCorreo);
   }, []);
 
-  const valor = useMemo<Contexto>(
-    () => ({
+  const cambiarEmpresa = useCallback((nuevo: string) => {
+    setTenantId(nuevo);
+    fijarTenant(nuevo);
+  }, []);
+
+  const valor = useMemo<Contexto>(() => {
+    const empresaActiva = sesion?.empresas.find((e) => e.oneTenantId === tenantId) ?? null;
+
+    return {
       correo,
       autenticado: correo !== null,
-      identidad,
-      esSuperAdministrador: identidad?.rol === "SuperAdministrador",
+      sesion,
+      empresaActiva,
+      esAdministradorPlataforma: sesion?.esAdministradorPlataforma ?? false,
       entrar,
+      cambiarEmpresa,
       salir,
-    }),
-    [correo, identidad, entrar, salir],
-  );
+    };
+  }, [correo, sesion, tenantId, entrar, cambiarEmpresa, salir]);
 
   return <SesionContexto.Provider value={valor}>{children}</SesionContexto.Provider>;
 }

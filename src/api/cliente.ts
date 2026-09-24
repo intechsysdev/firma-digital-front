@@ -1,10 +1,15 @@
 import { borrarSesion, guardarSesion, leerSesion } from "./sesionAlmacenada";
 
 /**
- * En desarrollo el front corre en su propio puerto y Vite hace de proxy hacia el API. En
- * producción ambos se sirven desde el mismo App Service, así que la ruta relativa basta.
+ * Dos destinos distintos:
+ *
+ * - ONE emite y renueva los tokens, y es donde viven empresas, usuarios y configuración.
+ * - BASE es el API de actas, que no tiene usuarios propios: solo verifica los tokens de One.
+ *
+ * En desarrollo BASE queda vacío y Vite reenvía /api; en producción lleva la URL absoluta.
  */
 const BASE = import.meta.env.VITE_API_URL ?? "";
+const ONE = (import.meta.env.VITE_ONE_URL ?? "").replace(/\/+$/, "");
 
 export class ErrorApi extends Error {
   readonly estado: number;
@@ -24,21 +29,22 @@ export function avisarAlPerderSesion(accion: () => void) {
 async function mensajeDeError(respuesta: Response): Promise<string> {
   try {
     const cuerpo = await respuesta.json();
-    return cuerpo?.message ?? cuerpo?.title ?? `El servidor respondió ${respuesta.status}.`;
+    return cuerpo?.message ?? cuerpo?.detail ?? cuerpo?.title ?? `El servidor respondió ${respuesta.status}.`;
   } catch {
     return `El servidor respondió ${respuesta.status}.`;
   }
 }
 
 /**
- * El token de acceso de Identity dura poco a propósito. Antes de dar una sesión por perdida se
- * intenta una vez con el de refresco: sin esto, la consola echaría al usuario cada hora.
+ * El token de acceso de One dura una hora. Antes de dar una sesión por perdida se intenta una
+ * vez con el de refresco, que además rota: reutilizar uno ya rotado revoca todas las sesiones,
+ * así que solo se intenta una vez y se guarda el nuevo de inmediato.
  */
 async function renovar(): Promise<boolean> {
   const sesion = leerSesion();
   if (!sesion?.refreshToken) return false;
 
-  const respuesta = await fetch(`${BASE}/api/v1/cuenta/refresh`, {
+  const respuesta = await fetch(`${ONE}/api/v1/auth/refresh`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refreshToken: sesion.refreshToken }),
@@ -54,7 +60,12 @@ async function renovar(): Promise<boolean> {
 async function pedir(ruta: string, opciones: RequestInit, reintentar = true): Promise<Response> {
   const sesion = leerSesion();
   const cabeceras = new Headers(opciones.headers);
+
   if (sesion?.accessToken) cabeceras.set("Authorization", `Bearer ${sesion.accessToken}`);
+
+  // Sin esto, un usuario que pertenece a varias empresas no tendría ninguna resuelta y el API
+  // no sabría qué datos mostrarle.
+  if (sesion?.tenantId) cabeceras.set("X-Tenant-Id", sesion.tenantId);
 
   const respuesta = await fetch(`${BASE}${ruta}`, { ...opciones, headers: cabeceras });
 
@@ -100,8 +111,9 @@ export async function obtenerArchivo(ruta: string): Promise<string> {
   return URL.createObjectURL(await respuesta.blob());
 }
 
+/** El login es contra One: el API de actas no emite credenciales. */
 export async function iniciarSesion(correo: string, clave: string): Promise<void> {
-  const respuesta = await fetch(`${BASE}/api/v1/cuenta/login`, {
+  const respuesta = await fetch(`${ONE}/api/v1/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: correo, password: clave }),
@@ -115,5 +127,11 @@ export async function iniciarSesion(correo: string, clave: string): Promise<void
   }
 
   const datos = await respuesta.json();
-  guardarSesion({ accessToken: datos.accessToken, refreshToken: datos.refreshToken, correo });
+
+  guardarSesion({
+    accessToken: datos.accessToken,
+    refreshToken: datos.refreshToken,
+    correo,
+    tenantId: null,
+  });
 }

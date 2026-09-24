@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { contarPorEstado, listarEntregas } from "../api/entregas";
-import { listarEmpresas } from "../api/administracion";
 import { useSesion } from "../sesion/SesionContexto";
-import type { Empresa, Entrega, FiltrosEntregas, Pagina } from "../api/tipos";
+import type { Entrega, FiltrosEntregas, Pagina } from "../api/tipos";
 import { Aviso, Cargando } from "../componentes/Cargando";
 import { EtiquetaEstado, fechaCorta, hora } from "../componentes/Etiquetas";
 
@@ -17,10 +16,11 @@ interface Resumen {
 }
 
 export function Entregas() {
-  const { esSuperAdministrador } = useSesion();
+  const { esAdministradorPlataforma, sesion } = useSesion();
 
   const [filtros, setFiltros] = useState<FiltrosEntregas>(VACIOS);
-  const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  // Las empresas salen de la sesión: son las que el token de One dice que alcanza.
+  const empresas = sesion?.empresas ?? [];
   const [datos, setDatos] = useState<Pagina<Entrega> | null>(null);
   const [resumen, setResumen] = useState<Resumen | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -42,11 +42,6 @@ export function Entregas() {
   useEffect(() => {
     void cargar(filtros);
   }, [cargar, filtros]);
-
-  useEffect(() => {
-    if (!esSuperAdministrador) return;
-    void listarEmpresas().then(setEmpresas).catch(() => setEmpresas([]));
-  }, [esSuperAdministrador]);
 
   // El resumen es del total, no de la página ni de los filtros: es el contexto contra el que
   // se leen los filtros, así que cambiarlos no debe moverlo.
@@ -126,7 +121,7 @@ export function Entregas() {
           <span className="rotulo">Hasta</span>
           <input type="date" className="campo" value={filtros.hasta ?? ""} onChange={(e) => cambiar("hasta", e.target.value)} />
         </label>
-        {esSuperAdministrador && empresas.length > 0 && (
+        {esAdministradorPlataforma && empresas.length > 0 && (
           <label>
             <span className="rotulo">Empresa</span>
             <select
@@ -184,7 +179,7 @@ export function Entregas() {
                 <th>Cédula</th>
                 <th>Equipo</th>
                 <th>Canal</th>
-                {esSuperAdministrador && <th>Empresa</th>}
+                {esAdministradorPlataforma && <th>Empresa</th>}
                 <th>Estado</th>
                 <th aria-label="Acciones" />
               </tr>
@@ -203,7 +198,7 @@ export function Entregas() {
                     <span className="sub dato">{entrega.imei ?? entrega.deviceId}</span>
                   </td>
                   <td>{entrega.canal ?? "—"}</td>
-                  {esSuperAdministrador && <td>{entrega.empresa ?? "—"}</td>}
+                  {esAdministradorPlataforma && <td>{entrega.empresa ?? "—"}</td>}
                   <td>
                     <EtiquetaEstado estado={entrega.estadoProceso} />
                   </td>
