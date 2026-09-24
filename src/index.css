@@ -424,3 +424,102 @@ object.marco-pdf > .vacio { padding: 48px 24px; }
 /* El selector de empresa solo aparece cuando hay más de una: no debe dominar la barra. */
 .selector-empresa { max-width: 200px; font-size: 13px; padding: 6px 9px; }
 @media (max-width: 760px) { .selector-empresa { max-width: 130px; } }
+
+/* ---------- Firma por enlace ---------- */
+/* La abre el asociado desde un correo, casi siempre en el teléfono: una sola columna estrecha,
+   sin la navegación de la consola, y el botón de firmar siempre a mano al final. */
+.firmar { min-height: 100dvh; }
+.firmar-barra {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 16px;
+  background: color-mix(in srgb, var(--superficie) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--borde);
+}
+.firmar-contenido { max-width: 760px; margin: 0 auto; padding: 20px 16px 48px; }
+.firmar-intro { margin: 0 0 4px; color: var(--tinta-media); font-size: 15px; line-height: 1.65; }
+.firmar-intro strong { color: var(--tinta); }
+.firmar-contenido .panel { margin-top: 16px; }
+.firmar-contenido .panel-barra .sub { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 55%; }
+
+/* En el teléfono cada campo ocupa la fila entera: dos columnas de 150px no dejan leer un IMEI. */
+.firmar .rejilla-campos { grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); }
+.firmar .campo { font-size: 16px; width: 100%; }
+.firmar-entregables, .firmar-nombre { display: flex; flex-direction: column; gap: 5px; margin-top: 14px; }
+.firmar-nombre { margin: 0 0 14px; }
+.firmar-entregables textarea { resize: vertical; }
+
+/* Un dato corregido se marca en forma y en color: el acta sale con lo que el asociado confirmó, y
+   tiene que saber que está cambiando lo que le enviaron, no solo llenando. */
+.campo-cambiado .campo { border-color: var(--espera); background: var(--espera-tenue); }
+.marca-cambio {
+  margin-left: 6px; padding: 1px 6px; border-radius: 999px;
+  background: var(--espera-tenue); color: var(--espera);
+  font-size: 10px; letter-spacing: .05em;
+}
+
+.clausulas { padding: 4px 0; }
+.clausula { border-top: 1px solid var(--borde); }
+.clausula:first-child { border-top: 0; }
+.clausula summary { cursor: pointer; padding: 13px 20px; font-weight: 600; font-size: 14px; }
+.clausula > :not(summary) { margin: 0 20px 14px; color: var(--tinta-media); font-size: 14px; }
+.clausula li { margin-bottom: 6px; }
+.clausula ol, .clausula ul { padding-left: 20px; }
+
+/* Tinta sobre papel en cualquier tema, como .firma: el PNG sale transparente y el acta es blanca. */
+.lienzo-marco {
+  position: relative;
+  background: #ffffff;
+  border: 2px dashed var(--borde-fuerte);
+  border-radius: var(--radio-sm);
+  overflow: hidden;
+}
+.lienzo-marco.firmado { border-style: solid; border-color: var(--bien); }
+.lienzo-firma { display: block; width: 100%; height: 200px; touch-action: none; cursor: crosshair; }
+.lienzo-guia {
+  position: absolute; left: 0; right: 0; bottom: 30px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  pointer-events: none; color: #6b7885; font-size: 13px;
+  transition: opacity .15s ease;
+}
+.lienzo-guia .linea { width: 72%; border-top: 1px solid #c3ccd7; }
+.lienzo-marco.firmado .lienzo-guia { opacity: 0; }
+
+.firmar-envio {
+  position: sticky; bottom: 0; z-index: 5;
+  margin: 20px -16px 0; padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+  background: var(--superficie);
+  border-top: 1px solid var(--borde);
+  box-shadow: 0 -8px 24px -16px rgb(20 26 34 / .35);
+}
+.firmar-envio .boton { width: 100%; padding: 12px; font-size: 15px; }
+.acepto { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 14px; color: var(--tinta-media); cursor: pointer; }
+.acepto input { flex: none; width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--acento); }
+
+.dialogo {
+  width: min(400px, calc(100vw - 32px));
+  padding: 22px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  background: var(--superficie);
+  color: var(--tinta);
+  box-shadow: var(--sombra-alta);
+}
+.dialogo::backdrop { background: rgb(11 16 23 / .55); }
+.dialogo h2 { font-size: 20px; }
+.dialogo p { color: var(--tinta-media); font-size: 14px; }
+.dialogo .acciones-formulario { margin-top: 18px; }
+
+.firmar-final h2 { font-size: 22px; }
+.final-marca {
+  width: 68px; height: 68px; margin: 0 auto 16px;
+  display: grid; place-items: center;
+  border-radius: 50%; background: var(--bien-tenue); color: var(--bien);
+}
+.final-marca svg { width: 34px; height: 34px; }
+.final-numero {
+  display: inline-block; margin: 6px 0 4px; padding: 7px 14px;
+  border: 1px solid var(--borde); border-radius: var(--radio-sm);
+  background: var(--superficie); color: var(--tinta); letter-spacing: .06em;
+}

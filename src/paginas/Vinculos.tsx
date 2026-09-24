@@ -128,7 +128,7 @@ export function Vinculos() {
                       {comprobacion && (
                         <span className="sub">
                           {comprobacion.alcanzable
-                            ? `One responde · MobiControl ${comprobacion.mobiControlConfigurado ? "sí" : "no"} · correo ${comprobacion.correoConfigurado ? "sí" : "no"}`
+                            ? `One responde · MobiControl ${comprobacion.mobiControlConfigurado ? "sí" : "no"} · correo ${comprobacion.correoConfigurado ? "sí" : "no"} · callback ${comprobacion.callbackConfigurado ? (comprobacion.callbackFirmado ? "sí, firmado" : "sí, sin firmar") : "no"}`
                             : "One no responde con esa credencial"}
                         </span>
                       )}

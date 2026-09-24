@@ -54,6 +54,10 @@ export interface Comprobacion {
   infobipRemitente: string | null;
   correosCopia: string | null;
   configVersion: string | null;
+  callbackConfigurado: boolean;
+  callbackUrl: string | null;
+  /** Si One tiene CALLBACK_SECRET: sin él los avisos salen sin la cabecera de firma. */
+  callbackFirmado: boolean;
 }
 
 export const obtenerSesion = () => obtenerJson<Sesion>("/api/v1/sesion");

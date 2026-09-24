@@ -1,6 +1,7 @@
 import { Navigate, NavLink, Route, Routes } from "react-router-dom";
 import { DetalleEntrega } from "./paginas/DetalleEntrega";
 import { Entregas } from "./paginas/Entregas";
+import { FirmarActa } from "./paginas/FirmarActa";
 import { Login } from "./paginas/Login";
 import { Vinculos } from "./paginas/Vinculos";
 import { SelectorTema } from "./componentes/SelectorTema";
@@ -61,6 +62,17 @@ function Marco({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  return (
+    <Routes>
+      {/* El enlace de firma va fuera de la consola: quien firma no tiene cuenta, y el token del
+          enlace es toda su credencial. */}
+      <Route path="/firmar/:token" element={<FirmarActa />} />
+      <Route path="*" element={<Consola />} />
+    </Routes>
+  );
+}
+
+function Consola() {
   const {
     autenticado, sesion, errorSesion, reintentarSesion, empresaActiva, esAdministradorPlataforma, salir,
   } = useSesion();

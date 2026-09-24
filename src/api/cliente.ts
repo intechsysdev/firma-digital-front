@@ -9,6 +9,9 @@ import { borrarSesion, guardarSesion, leerSesion } from "./sesionAlmacenada";
  * En desarrollo BASE queda vacío y Vite reenvía /api; en producción lleva la URL absoluta.
  */
 const BASE = import.meta.env.VITE_API_URL ?? "";
+
+/** URL completa de una ruta del API de actas, para las llamadas que no llevan sesión. */
+export const urlApi = (ruta: string) => `${BASE}${ruta}`;
 const ONE = (import.meta.env.VITE_ONE_URL ?? "").replace(/\/+$/, "");
 
 export class ErrorApi extends Error {
@@ -26,7 +29,7 @@ export function avisarAlPerderSesion(accion: () => void) {
   alPerderSesion = accion;
 }
 
-async function mensajeDeError(respuesta: Response): Promise<string> {
+export async function mensajeDeError(respuesta: Response): Promise<string> {
   try {
     const cuerpo = await respuesta.json();
     return cuerpo?.message ?? cuerpo?.detail ?? cuerpo?.title ?? `El servidor respondió ${respuesta.status}.`;
