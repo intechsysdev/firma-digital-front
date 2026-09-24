@@ -10,6 +10,9 @@ interface Contexto {
   autenticado: boolean;
   /** Null mientras se consulta. La consola espera antes de decidir qué mostrar. */
   sesion: Sesion | null;
+  /** Por qué no se pudo obtener la sesión. Sin esto la consola se quedaría esperando para siempre. */
+  errorSesion: string | null;
+  reintentarSesion: () => void;
   empresaActiva: EmpresaAccesible | null;
   esAdministradorPlataforma: boolean;
   entrar: (correo: string, clave: string) => Promise<void>;
@@ -23,12 +26,15 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
   const [correo, setCorreo] = useState<string | null>(() => leerSesion()?.correo ?? null);
   const [sesion, setSesion] = useState<Sesion | null>(null);
   const [tenantId, setTenantId] = useState<string | null>(() => leerSesion()?.tenantId ?? null);
+  const [errorSesion, setErrorSesion] = useState<string | null>(null);
+  const [intento, setIntento] = useState(0);
 
   const salir = useCallback(() => {
     borrarSesion();
     setCorreo(null);
     setSesion(null);
     setTenantId(null);
+    setErrorSesion(null);
   }, []);
 
   useEffect(() => avisarAlPerderSesion(() => { setCorreo(null); setSesion(null); }), []);
@@ -53,10 +59,27 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
         setTenantId(elegida);
         fijarTenant(elegida);
       })
-      .catch(() => { if (vigente) setSesion(null); });
+      .catch((error: unknown) => {
+        if (!vigente) return;
+        setSesion(null);
+        // fetch rechaza con TypeError cuando ni siquiera hay respuesta: red caída o CORS. El
+        // navegador no expone cuál de las dos, pero ambas se ven igual desde aquí.
+        setErrorSesion(
+          error instanceof TypeError
+            ? "No se pudo contactar al servidor. Revisa tu conexión o inténtalo de nuevo."
+            : error instanceof Error
+              ? error.message
+              : "No se pudo cargar la sesión.",
+        );
+      });
 
     return () => { vigente = false; };
-  }, [correo]);
+  }, [correo, intento]);
+
+  const reintentarSesion = useCallback(() => {
+    setErrorSesion(null);
+    setIntento((n) => n + 1);
+  }, []);
 
   const entrar = useCallback(async (nuevoCorreo: string, clave: string) => {
     await iniciarSesion(nuevoCorreo, clave);
@@ -75,13 +98,15 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
       correo,
       autenticado: correo !== null,
       sesion,
+      errorSesion,
+      reintentarSesion,
       empresaActiva,
       esAdministradorPlataforma: sesion?.esAdministradorPlataforma ?? false,
       entrar,
       cambiarEmpresa,
       salir,
     };
-  }, [correo, sesion, tenantId, entrar, cambiarEmpresa, salir]);
+  }, [correo, sesion, errorSesion, reintentarSesion, tenantId, entrar, cambiarEmpresa, salir]);
 
   return <SesionContexto.Provider value={valor}>{children}</SesionContexto.Provider>;
 }

@@ -61,12 +61,27 @@ function Marco({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { autenticado, sesion, empresaActiva, esAdministradorPlataforma } = useSesion();
+  const {
+    autenticado, sesion, errorSesion, reintentarSesion, empresaActiva, esAdministradorPlataforma, salir,
+  } = useSesion();
 
   if (!autenticado) return <Login />;
 
   // Se espera a saber quién es antes de pintar: dibujar la navegación sin los permisos mostraría
   // módulos que desaparecen un segundo después.
+  if (!sesion && errorSesion) {
+    return (
+      <div className="vacio">
+        <h2>No se pudo preparar la consola</h2>
+        <p>{errorSesion}</p>
+        <div className="acciones-centradas">
+          <button type="button" className="boton" onClick={reintentarSesion}>Reintentar</button>
+          <button type="button" className="boton boton-secundario" onClick={salir}>Volver al inicio de sesión</button>
+        </div>
+      </div>
+    );
+  }
+
   if (!sesion) return <Cargando texto="Preparando la consola…" />;
 
   if (sesion.empresas.length === 0) {

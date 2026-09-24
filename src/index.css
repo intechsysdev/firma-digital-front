@@ -376,6 +376,7 @@ body {
 
 .vacio { text-align: center; padding: 56px 20px; color: var(--tinta-suave); }
 .vacio h2 { font-family: var(--display); font-size: 18px; color: var(--tinta); margin: 0 0 6px; }
+.acciones-centradas { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 
 .acciones-panel { display: inline-flex; gap: 8px; }
 /* El contenido alternativo del <object> necesita respirar: sin esto se pega a los bordes del
