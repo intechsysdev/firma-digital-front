@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import type { FormEvent } from "react";
 import { useSesion } from "../sesion/SesionContexto";
 import { Aviso } from "../componentes/Cargando";
 import { SelectorTema } from "../componentes/SelectorTema";
+import { ssoDisponible } from "../api/sso";
 
 export function Login() {
   const { entrar } = useSesion();
@@ -64,6 +66,11 @@ export function Login() {
         <button type="submit" className="boton boton-primario" disabled={enviando}>
           {enviando ? "Entrando…" : "Entrar"}
         </button>
+
+        {/* Con sesión abierta en One no hace falta escribir nada: se entra con esa. */}
+        {ssoDisponible() && (
+          <Link to="/sso" className="boton boton-secundario ingreso-sso">Entrar con One</Link>
+        )}
       </form>
     </div>
   );

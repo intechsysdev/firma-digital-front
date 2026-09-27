@@ -237,6 +237,7 @@ body {
 .ingreso-sub { margin: 5px 0 20px; color: var(--tinta-suave); font-size: 14px; }
 .ingreso label { font-size: 13px; font-weight: 600; color: var(--tinta-media); margin-top: 14px; margin-bottom: 5px; }
 .ingreso .boton { margin-top: 24px; padding: 11px; }
+.ingreso .ingreso-sso { margin-top: 10px; }
 
 /* ---------- Marco ---------- */
 .barra {
