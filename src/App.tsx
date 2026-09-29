@@ -106,9 +106,9 @@ function Consola() {
         <div className="vacio">
           <h2>Tu cuenta no alcanza ninguna empresa</h2>
           <p>
-            Ninguna de las empresas a las que perteneces en One está vinculada a este sistema, o
-            tu usuario todavía no es miembro de ninguna. Habla con el administrador de la
-            plataforma.
+            Ninguna de las empresas a las que perteneces en One tiene asignada la app Firma
+            digital. Pide al administrador de la plataforma que se la asigne a tu empresa o que te
+            agregue como miembro de una que ya la tenga.
           </p>
         </div>
       </Marco>

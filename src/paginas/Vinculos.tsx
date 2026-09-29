@@ -226,7 +226,7 @@ function FormularioVinculo({
         <div className="rejilla-campos">
           <label className="ancho-completo">
             <span className="rotulo">Tenant ID de One</span>
-            <input className="campo dato" required readOnly={vinculo !== null}
+            <input className="campo dato" required
               placeholder="00000000-0000-0000-0000-000000000000"
               value={datos.oneTenantId}
               onChange={(e) => setDatos({ ...datos, oneTenantId: e.target.value.trim() })} />
@@ -261,6 +261,8 @@ function FormularioVinculo({
         {vinculo && (
           <p className="nota">
             El secreto no se muestra nunca. Déjalo vacío para conservar el que ya está guardado.
+            Cambiar el Tenant ID re-apunta el vínculo sin perder sus actas ni la llave de los
+            equipos: sirve cuando la empresa se recreó en One con otro identificador.
           </p>
         )}
 
