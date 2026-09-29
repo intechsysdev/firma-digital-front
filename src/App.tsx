@@ -1,4 +1,4 @@
-import { Navigate, NavLink, Route, Routes } from "react-router-dom";
+import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { DetalleEntrega } from "./paginas/DetalleEntrega";
 import { Entregas } from "./paginas/Entregas";
 import { FirmarActa } from "./paginas/FirmarActa";
@@ -11,6 +11,8 @@ import { useSesion } from "./sesion/SesionContexto";
 
 function SelectorEmpresa() {
   const { sesion, empresaActiva, cambiarEmpresa } = useSesion();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   // Con una sola empresa el selector sobra: ocupa espacio y no ofrece ninguna elección.
   if (!sesion || sesion.empresas.length < 2) return null;
@@ -20,7 +22,11 @@ function SelectorEmpresa() {
       className="campo selector-empresa"
       aria-label="Empresa activa"
       value={empresaActiva?.oneTenantId ?? ""}
-      onChange={(e) => cambiarEmpresa(e.target.value)}
+      onChange={(e) => {
+        cambiarEmpresa(e.target.value);
+        // El acta abierta es de la empresa anterior: con la nueva ya no se puede ver.
+        if (pathname.startsWith("/entregas/")) navigate("/entregas");
+      }}
     >
       <option value="" disabled>Elige una empresa</option>
       {sesion.empresas.map((empresa) => (
@@ -57,7 +63,9 @@ function Marco({ children }: { children: React.ReactNode }) {
           </button>
         </div>
       </header>
-      <main className="contenido">{children}</main>
+      {/* La clave es la empresa: al cambiarla, las pantallas se montan de nuevo y piden sus datos
+          con la empresa nueva. Sin esto seguían mostrando lo de la anterior hasta recargar. */}
+      <main className="contenido" key={empresaActiva?.oneTenantId ?? "todas"}>{children}</main>
     </>
   );
 }
