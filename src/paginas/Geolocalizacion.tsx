@@ -127,6 +127,10 @@ export function Geolocalizacion() {
 
   const sinKey = config !== null && !config.googleMapsApiKey;
 
+  // Si la consulta falló, su mensaje ya dice la causa; los avisos de configuración serían
+  // consecuencias de lo mismo (sin configuración de One no hay MobiControl ni key) y solo confunden.
+  const avisarConfiguracion = !error && config !== null;
+
   return (
     <section>
       <header className="cabecera-seccion">
@@ -145,13 +149,13 @@ export function Geolocalizacion() {
       </header>
 
       {error && <Aviso tipo="error">{error}</Aviso>}
-      {config && !config.mobiControlConfigurado && (
+      {avisarConfiguracion && !config.mobiControlConfigurado && (
         <Aviso tipo="info">
           Esta empresa no tiene configurada su consola de MobiControl. Se configura en One, en
           Empresa → Firma digital → Variables.
         </Aviso>
       )}
-      {sinKey && (
+      {avisarConfiguracion && sinKey && (
         <Aviso tipo="info">
           Falta la variable GOOGLE_MAPS_API_KEY de la empresa en One: la tabla funciona, pero el mapa no se puede mostrar.
         </Aviso>
