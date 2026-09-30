@@ -524,3 +524,32 @@ object.marco-pdf > .vacio { padding: 48px 24px; }
   border: 1px solid var(--borde); border-radius: var(--radio-sm);
   background: var(--superficie); color: var(--tinta); letter-spacing: .06em;
 }
+
+/* ---------- Geolocalización ---------- */
+.geo { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
+.geo-con-detalle { grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); }
+@media (max-width: 980px) { .geo-con-detalle { grid-template-columns: 1fr; } }
+
+.mapa-marco {
+  position: relative;
+  height: min(62vh, 560px); min-height: 360px;
+  border: 1px solid var(--borde); border-radius: var(--radio);
+  overflow: hidden; background: var(--superficie-2);
+  box-shadow: var(--sombra);
+}
+.mapa { position: absolute; inset: 0; }
+.mapa-capa { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; background: var(--superficie-2); }
+.mapa-vacio { display: grid; place-items: center; padding: 20px; text-align: center; }
+/* El globo de Google es blanco en cualquier tema: el texto se fija oscuro para que se lea. */
+.mapa-globo { color: #141a22; font: 13px/1.5 var(--texto); display: flex; flex-direction: column; gap: 2px; }
+
+.geo-detalle { position: sticky; top: 76px; }
+.geo-titulo { font-size: 19px; }
+.geo-grupo { font-size: 12px; text-align: right; }
+.geo-recorrido { display: flex; align-items: flex-end; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+.geo-recorrido label { display: flex; flex-direction: column; gap: 5px; flex: 1 1 150px; }
+.geo-mapa-recorrido .mapa-marco { height: 260px; min-height: 260px; margin-top: 10px; box-shadow: none; }
+.geo-localizar { width: 100%; margin-top: 18px; }
+
+.fila-seleccionable { cursor: pointer; }
+.tabla tbody tr.fila-activa { background: var(--acento-tenue); }

@@ -2,6 +2,7 @@ import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from "reac
 import { DetalleEntrega } from "./paginas/DetalleEntrega";
 import { Entregas } from "./paginas/Entregas";
 import { FirmarActa } from "./paginas/FirmarActa";
+import { Geolocalizacion } from "./paginas/Geolocalizacion";
 import { SsoInicio, SsoRetorno } from "./paginas/Sso";
 import { Login } from "./paginas/Login";
 import { Vinculos } from "./paginas/Vinculos";
@@ -49,6 +50,7 @@ function Marco({ children }: { children: React.ReactNode }) {
 
         <nav className="navegacion">
           <NavLink to="/entregas">Actas</NavLink>
+          <NavLink to="/geolocalizacion">Geolocalización</NavLink>
           {/* Los vínculos con One son cosa de plataforma: las empresas y sus usuarios se
               administran en el portal de One, no aquí. */}
           {esAdministradorPlataforma && <NavLink to="/vinculos">Vínculos</NavLink>}
@@ -132,6 +134,7 @@ function Consola() {
       <Routes>
         <Route path="/entregas" element={<Entregas />} />
         <Route path="/entregas/:uid" element={<DetalleEntrega />} />
+        <Route path="/geolocalizacion" element={<Geolocalizacion />} />
         <Route
           path="/vinculos"
           element={esAdministradorPlataforma ? <Vinculos /> : <Navigate to="/entregas" replace />}
