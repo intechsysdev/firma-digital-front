@@ -6,7 +6,7 @@ import { ErrorApi, mensajeDeError, urlApi } from "./cliente";
  * nadie al login ni borrar la sesión de un administrador que abra el enlace para probarlo.
  */
 
-export type EstadoSolicitud = "PENDIENTE" | "FIRMADA" | "VENCIDA";
+export type EstadoSolicitud = "PENDIENTE" | "FIRMADA" | "RECHAZADA" | "VENCIDA";
 
 /** Lo que el asociado puede revisar y corregir antes de firmar. */
 export interface DatosEditables {
@@ -39,6 +39,8 @@ export interface FormularioFirma {
   entregaUid: string | null;
   fechaFirma: string | null;
   nombreAsociadoFirmante: string | null;
+  fechaRechazo?: string | null;
+  motivoRechazo?: string | null;
 }
 
 export interface FirmaRegistrada {
@@ -69,6 +71,15 @@ export async function firmar(token: string, firma: FirmaEnviada): Promise<FirmaR
     body: JSON.stringify(firma),
   }));
   return (await respuesta.json()) as FirmaRegistrada;
+}
+
+/** El asociado no acepta el acta. Es definitivo, y se avisa al sistema de origen. */
+export async function rechazar(token: string, motivo: string, nombre: string): Promise<void> {
+  await comprobar(await fetch(ruta(token, "/rechazar"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ motivo, nombre: nombre || null }),
+  }));
 }
 
 /** El PDF se trae como blob para abrirlo desde memoria, igual que en la consola. */

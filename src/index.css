@@ -553,3 +553,13 @@ object.marco-pdf > .vacio { padding: 48px 24px; }
 
 .fila-seleccionable { cursor: pointer; }
 .tabla tbody tr.fila-activa { background: var(--acento-tenue); }
+
+/* Rechazo: discreto bajo el botón principal, para que no compita con firmar. */
+.boton-texto {
+  appearance: none; border: 0; background: none; padding: 6px 0; cursor: pointer;
+  font: inherit; font-size: 14px; font-weight: 600; color: var(--tinta-suave); text-decoration: underline;
+}
+.boton-texto:hover { color: var(--mal); }
+.firmar-envio .firmar-rechazar { display: block; width: auto; margin: 10px auto 0; padding: 4px 0; }
+.boton-peligro { background: var(--mal); color: #ffffff; }
+.boton-peligro:not(:disabled):hover { filter: brightness(1.08); }

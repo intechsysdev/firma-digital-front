@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useParams } from "react-router-dom";
-import { descargarActa, firmar, obtenerFormulario } from "../api/firmas";
+import { descargarActa, firmar, obtenerFormulario, rechazar } from "../api/firmas";
 import type { DatosEditables, FirmaRegistrada, FormularioFirma } from "../api/firmas";
 import { Aviso, Cargando } from "../componentes/Cargando";
 import { LienzoFirma } from "../componentes/LienzoFirma";
@@ -70,6 +70,12 @@ export function FirmarActa() {
           <Estado titulo="No se pudo abrir el acta">{errorCarga}</Estado>
         ) : !formulario ? (
           <Cargando texto="Abriendo el acta…" />
+        ) : formulario.estado === "RECHAZADA" ? (
+          <Estado titulo="Esta acta fue rechazada">
+            {formulario.fechaRechazo ? `Se rechazó el ${fechaLarga(formulario.fechaRechazo)}. ` : ""}
+            {formulario.motivoRechazo ? `Motivo: ${formulario.motivoRechazo.replace(/[.\s]+$/, "")}. ` : ""}
+            Ya se le avisó a {formulario.empresa}.
+          </Estado>
         ) : formulario.estado === "VENCIDA" ? (
           <Estado titulo="Este enlace venció">
             Venció el {fechaLarga(formulario.fechaVencimiento)}. Pide a quien te lo envió que genere uno nuevo.
@@ -113,9 +119,13 @@ function Formulario({ token, formulario }: { token: string; formulario: Formular
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [registro, setRegistro] = useState<FirmaRegistrada | null>(null);
+  const [motivo, setMotivo] = useState("");
+  const [rechazando, setRechazando] = useState(false);
+  const [rechazada, setRechazada] = useState(false);
 
   const tablero = useRef<ControlFirma>(null);
   const confirmacion = useRef<HTMLDialogElement>(null);
+  const dialogoRechazo = useRef<HTMLDialogElement>(null);
 
   // Lo que el asociado cambió frente a lo que mandó el origen. Se señala en cada campo para que
   // sepa que está corrigiendo, no solo llenando: la solicitud conserva los datos originales.
@@ -151,6 +161,31 @@ function Formulario({ token, formulario }: { token: string; formulario: Formular
     } finally {
       setEnviando(false);
     }
+  }
+
+  async function confirmarRechazo() {
+    if (!motivo.trim()) return;
+    setRechazando(true);
+    setError(null);
+
+    try {
+      await rechazar(token, motivo.trim(), nombre.trim());
+      dialogoRechazo.current?.close();
+      setRechazada(true);
+    } catch (e) {
+      dialogoRechazo.current?.close();
+      setError(e instanceof Error ? e.message : "No se pudo registrar el rechazo. Intenta de nuevo.");
+    } finally {
+      setRechazando(false);
+    }
+  }
+
+  if (rechazada) {
+    return (
+      <Estado titulo="Rechazaste el acta">
+        Le avisamos a {formulario.empresa} que no la aceptas, con el motivo que escribiste. Ellos se pondrán en contacto contigo.
+      </Estado>
+    );
   }
 
   if (registro) {
@@ -293,7 +328,35 @@ function Formulario({ token, formulario }: { token: string; formulario: Formular
         <button type="submit" className="boton boton-primario" disabled={!listo || enviando}>
           {enviando ? "Registrando el acta…" : "Firmar y enviar"}
         </button>
+
+        {/* Quien no recibe el equipo, o ve datos que no son suyos, necesita una salida distinta
+            de simplemente no firmar: así el origen se entera en vez de esperar hasta el vencimiento. */}
+        <button type="button" className="boton-texto firmar-rechazar" onClick={() => dialogoRechazo.current?.showModal()}>
+          No acepto el acta
+        </button>
       </div>
+
+      <dialog ref={dialogoRechazo} className="dialogo" aria-labelledby="titulo-rechazo">
+        <h2 id="titulo-rechazo" className="display">¿Por qué no aceptas el acta?</h2>
+        <p>Le avisaremos a {formulario.empresa} con tu respuesta. Después de rechazarla ya no podrás firmarla con este enlace.</p>
+        <textarea
+          className="campo"
+          rows={3}
+          maxLength={500}
+          placeholder="Por ejemplo: el IMEI no corresponde al equipo que recibí."
+          value={motivo}
+          onChange={(e) => setMotivo(e.target.value)}
+          style={{ width: "100%", marginTop: 8 }}
+        />
+        <div className="acciones-formulario">
+          <button type="button" className="boton boton-secundario" onClick={() => dialogoRechazo.current?.close()}>
+            Volver
+          </button>
+          <button type="button" className="boton boton-peligro" disabled={!motivo.trim() || rechazando} onClick={() => void confirmarRechazo()}>
+            {rechazando ? "Enviando…" : "Rechazar el acta"}
+          </button>
+        </div>
+      </dialog>
 
       <dialog ref={confirmacion} className="dialogo" aria-labelledby="titulo-confirmar">
         <h2 id="titulo-confirmar" className="display">¿Confirmas la firma?</h2>
