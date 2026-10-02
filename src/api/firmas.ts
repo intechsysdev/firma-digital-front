@@ -13,6 +13,8 @@ export interface DatosEditables {
   cedula: string;
   usuario: string;
   correo: string;
+  tipoDispositivo: string;
+  serial: string;
   fabricante: string;
   modelo: string;
   imei: string;
@@ -27,7 +29,7 @@ export interface DatosEditables {
 }
 
 /** Los datos tal como los precargó el sistema de origen. */
-export type DatosSolicitud = { deviceId: string } & { [K in keyof DatosEditables]: string | null };
+export type DatosSolicitud = { deviceId: string | null } & { [K in keyof DatosEditables]: string | null };
 
 export interface FormularioFirma {
   estado: EstadoSolicitud;

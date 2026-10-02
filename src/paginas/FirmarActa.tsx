@@ -18,9 +18,11 @@ const CAMPOS_ASOCIADO: Campo[] = [
 ];
 
 const CAMPOS_EQUIPO: Campo[] = [
+  { clave: "tipoDispositivo", etiqueta: "Tipo de equipo" },
   { clave: "fabricante", etiqueta: "Marca" },
   { clave: "modelo", etiqueta: "Modelo" },
   { clave: "imei", etiqueta: "IMEI", dato: true, modo: "numeric" },
+  { clave: "serial", etiqueta: "Serial", dato: true },
   { clave: "iccid", etiqueta: "SIM (ICCID)", dato: true, modo: "numeric" },
   { clave: "numeroCelular", etiqueta: "No. celular", dato: true, modo: "tel" },
   { clave: "estado", etiqueta: "Estado" },
@@ -211,7 +213,10 @@ function Formulario({ token, formulario }: { token: string; formulario: Formular
       <section className="panel">
         <div className="panel-barra">
           <span className="rotulo">Datos del equipo</span>
-          <span className="sub dato" title="Identificador del equipo en MobiControl">{original.deviceId}</span>
+          {/* Sin DeviceId, el equipo se busca en MobiControl por IMEI o serial al firmar. */}
+          {original.deviceId && (
+            <span className="sub dato" title="Identificador del equipo en MobiControl">{original.deviceId}</span>
+          )}
         </div>
         <div className="panel-cuerpo">
           {campos(CAMPOS_EQUIPO)}
