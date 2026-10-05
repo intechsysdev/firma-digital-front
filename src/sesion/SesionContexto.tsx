@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { avisarAlPerderSesion, iniciarSesion, revocarSesion } from "../api/cliente";
+import { avisarAlPerderSesion, iniciarSesion, revocarSesion, verificarSesion } from "../api/cliente";
 import { borrarSesion, escucharOtrasPestanas, fijarTenant, leerSesion } from "../api/sesionAlmacenada";
 import { obtenerSesion } from "../api/plataforma";
 import type { EmpresaAccesible, Sesion } from "../api/plataforma";
@@ -39,6 +39,26 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => avisarAlPerderSesion(() => { setCorreo(null); setSesion(null); }), []);
+
+  // Si se cerró sesión en One, esta también se cerró: se comprueba al volver a la pestaña y cada
+  // minuto mientras está a la vista.
+  useEffect(() => {
+    if (correo === null) return;
+
+    const comprobar = () => {
+      if (document.visibilityState === "visible") void verificarSesion();
+    };
+
+    const intervalo = window.setInterval(comprobar, 60_000);
+    window.addEventListener("focus", comprobar);
+    document.addEventListener("visibilitychange", comprobar);
+
+    return () => {
+      window.clearInterval(intervalo);
+      window.removeEventListener("focus", comprobar);
+      document.removeEventListener("visibilitychange", comprobar);
+    };
+  }, [correo]);
 
   // Lo que otra pestaña haga con la sesión vale también aquí.
   useEffect(

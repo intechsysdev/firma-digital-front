@@ -115,6 +115,30 @@ export async function obtenerArchivo(ruta: string): Promise<string> {
 }
 
 /**
+ * Pregunta a One si la sesión sigue abierta. Cerrar sesión en el portal cierra también esta, pero
+ * una pantalla quieta no hace peticiones y no se enteraría: la consola lo pregunta al volver a la
+ * pestaña y cada tanto. Un token vencido se renueva; una sesión cerrada vuelve al login. Sin red
+ * no se concluye nada.
+ */
+export async function verificarSesion(): Promise<void> {
+  const sesion = leerSesion();
+  if (!sesion?.accessToken) return;
+
+  const preguntar = (token: string) =>
+    fetch(`${ONE}/api/v1/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+
+  try {
+    if ((await preguntar(sesion.accessToken)).status !== 401) return;
+    if (await renovar()) return;
+  } catch {
+    return;
+  }
+
+  borrarSesion();
+  alPerderSesion?.();
+}
+
+/**
  * Revoca en One el token de refresco de esta sesión. Sin esto, al salir el token seguía vivo
  * hasta vencer. Lee la sesión antes del primer await: quien llama la borra justo después.
  * Si One no responde no pasa nada: la sesión se cierra igual en el navegador.
