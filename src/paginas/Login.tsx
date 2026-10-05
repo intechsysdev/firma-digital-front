@@ -69,7 +69,7 @@ export function Login() {
 
         {/* Con sesión abierta en One no hace falta escribir nada: se entra con esa. */}
         {ssoDisponible() && (
-          <Link to="/sso" className="boton boton-secundario ingreso-sso">Entrar con One</Link>
+          <Link to="/sso?cuenta=elegir" className="boton boton-secundario ingreso-sso">Entrar con One</Link>
         )}
       </form>
     </div>

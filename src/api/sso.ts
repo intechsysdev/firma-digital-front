@@ -50,7 +50,7 @@ export const ssoDisponible = () => PORTAL !== "" && ONE !== "";
  * Manda al usuario al portal de One. La empresa, si viene, es la que eligió en One al abrir la
  * app: se reenvía para que One compruebe que tiene acceso por ella y para dejarla elegida aquí.
  */
-export async function iniciarSso(tenantId?: string | null): Promise<void> {
+export async function iniciarSso(tenantId?: string | null, elegirCuenta = false): Promise<void> {
   const transaccion: Transaccion = { verificador: aleatorio(32), estado: aleatorio(16) };
   sessionStorage.setItem(CLAVE_TRANSACCION, JSON.stringify(transaccion));
 
@@ -61,6 +61,9 @@ export async function iniciarSso(tenantId?: string | null): Promise<void> {
   destino.searchParams.set("code_challenge_method", "S256");
   destino.searchParams.set("state", transaccion.estado);
   if (tenantId) destino.searchParams.set("tenant", tenantId);
+  // Desde el login de la consola no se entra en silencio con quien tenga la sesión abierta en
+  // One: quien acaba de salir quizá quiere entrar con otra cuenta. One pregunta con cuál seguir.
+  if (elegirCuenta) destino.searchParams.set("prompt", "select_account");
 
   // replace: el botón Atrás desde One no debe volver a esta página de paso y arrancar otro intento.
   window.location.replace(destino.toString());

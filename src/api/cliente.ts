@@ -114,6 +114,28 @@ export async function obtenerArchivo(ruta: string): Promise<string> {
   return URL.createObjectURL(await respuesta.blob());
 }
 
+/**
+ * Revoca en One el token de refresco de esta sesión. Sin esto, al salir el token seguía vivo
+ * hasta vencer. Lee la sesión antes del primer await: quien llama la borra justo después.
+ * Si One no responde no pasa nada: la sesión se cierra igual en el navegador.
+ */
+export async function revocarSesion(): Promise<void> {
+  const sesion = leerSesion();
+  if (!sesion?.refreshToken) return;
+
+  try {
+    await fetch(`${ONE}/api/v1/auth/logout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${sesion.accessToken}` },
+      body: JSON.stringify({ refreshToken: sesion.refreshToken }),
+      // Que salga aunque la página se recargue enseguida.
+      keepalive: true,
+    });
+  } catch {
+    /* sin red: el token vence solo */
+  }
+}
+
 /** El login es contra One: el API de actas no emite credenciales. */
 export async function iniciarSesion(correo: string, clave: string): Promise<void> {
   const respuesta = await fetch(`${ONE}/api/v1/auth/login`, {

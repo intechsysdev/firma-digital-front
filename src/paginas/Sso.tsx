@@ -18,7 +18,7 @@ export function SsoInicio() {
     if (!ssoDisponible() || iniciado.current) return;
     iniciado.current = true;
 
-    iniciarSso(params.get("tenant")).catch((e: unknown) => {
+    iniciarSso(params.get("tenant"), params.get("cuenta") === "elegir").catch((e: unknown) => {
       setError(e instanceof Error ? e.message : "No se pudo iniciar la sesión con One.");
     });
   }, [params]);

@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { avisarAlPerderSesion, iniciarSesion } from "../api/cliente";
-import { borrarSesion, fijarTenant, leerSesion } from "../api/sesionAlmacenada";
+import { avisarAlPerderSesion, iniciarSesion, revocarSesion } from "../api/cliente";
+import { borrarSesion, escucharOtrasPestanas, fijarTenant, leerSesion } from "../api/sesionAlmacenada";
 import { obtenerSesion } from "../api/plataforma";
 import type { EmpresaAccesible, Sesion } from "../api/plataforma";
 
@@ -30,6 +30,7 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
   const [intento, setIntento] = useState(0);
 
   const salir = useCallback(() => {
+    void revocarSesion();
     borrarSesion();
     setCorreo(null);
     setSesion(null);
@@ -38,6 +39,30 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => avisarAlPerderSesion(() => { setCorreo(null); setSesion(null); }), []);
+
+  // Lo que otra pestaña haga con la sesión vale también aquí.
+  useEffect(
+    () =>
+      escucharOtrasPestanas((nueva) => {
+        if (!nueva) {
+          // Salió en otra pestaña.
+          setCorreo(null);
+          setSesion(null);
+          setTenantId(null);
+          return;
+        }
+
+        // Entró otro usuario: se recarga entera para no arrastrar nada del anterior.
+        if (nueva.correo.toLowerCase() !== (correo ?? "").toLowerCase()) {
+          window.location.reload();
+          return;
+        }
+
+        // El mismo usuario: o solo rotó el token, o eligió otra empresa allá; se sigue esa.
+        setTenantId(nueva.tenantId);
+      }),
+    [correo],
+  );
 
   // Quién es y a qué empresas alcanza lo responde el API de actas, no el token: el token trae
   // los identificadores de One, pero no sus nombres ni cuáles están vinculadas a este sistema.
