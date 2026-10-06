@@ -5,6 +5,18 @@
 		},
 		{
 			"path": "../../one"
+		},
+		{
+			"path": "../../geomonitoreo-api"
+		},
+		{
+			"path": "../../geomonitoreo-front"
+		},
+		{
+			"path": "../../zero-touch-api"
+		},
+		{
+			"path": "../../zero-touch-front"
 		}
 	],
 	"settings": {}
