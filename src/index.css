@@ -563,3 +563,15 @@ object.marco-pdf > .vacio { padding: 48px 24px; }
 .firmar-envio .firmar-rechazar { display: block; width: auto; margin: 10px auto 0; padding: 4px 0; }
 .boton-peligro { background: var(--mal); color: #ffffff; }
 .boton-peligro:not(:disabled):hover { filter: brightness(1.08); }
+
+/* Atributos de MobiControl ------------------------------------------------------------- */
+.campo-busqueda { max-width: 260px; }
+.celda-opciones { max-width: 340px; font-size: 13px; color: var(--tinta-media); }
+.confirmar-borrado { align-items: center; }
+.confirmar-borrado .sub { display: inline; margin: 0 4px 0 0; }
+.rejilla-campos label.casilla { flex-direction: row; align-items: center; gap: 8px; font-size: 14px; }
+/* Cada par nombre/valor va en su propio div (para la clave de React); el div no cuenta para la rejilla. */
+.ficha-atributos .ficha-fila { display: contents; }
+.ficha-atributos dd { align-self: center; }
+.campo-chico { padding: 4px 8px; font-size: 13px; width: 100%; max-width: 220px; }
+.campo.campo-cambiado { border-color: var(--espera); background: var(--espera-tenue); }

@@ -103,6 +103,21 @@ export async function enviarJson<T>(
   return (await respuesta.json()) as T;
 }
 
+/** Igual que enviarJson, para las operaciones que responden 204 sin cuerpo. */
+export async function enviarSinRespuesta(
+  ruta: string,
+  cuerpo?: unknown,
+  metodo: "POST" | "PUT" | "DELETE" = "POST",
+): Promise<void> {
+  const respuesta = await pedir(ruta, {
+    method: metodo,
+    headers: cuerpo === undefined ? {} : { "Content-Type": "application/json" },
+    body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
+  });
+
+  if (!respuesta.ok) throw new ErrorApi(respuesta.status, await mensajeDeError(respuesta));
+}
+
 /**
  * Descarga un archivo protegido y lo entrega como URL de objeto. Se hace así y no con un
  * <img src> o un enlace directo porque el token viaja en la cabecera: en la URL quedaría

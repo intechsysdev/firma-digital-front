@@ -4,6 +4,7 @@ import {
   descargarFirma, descargarPdf, listarCorreos, obtenerEntrega, reenviarCorreo, reintentarSincronizacion,
 } from "../api/entregas";
 import type { Entrega, EnvioCorreo, ResultadoSincronizacion } from "../api/tipos";
+import { AtributosEquipo } from "../componentes/AtributosEquipo";
 import { Aviso, Cargando } from "../componentes/Cargando";
 import { EtiquetaEstado, fecha } from "../componentes/Etiquetas";
 
@@ -130,6 +131,8 @@ export function DetalleEntrega() {
               )}
             </div>
           </div>
+
+          <AtributosEquipo deviceId={entrega.deviceId} />
 
           <div className="panel">
             <div className="panel-barra">
