@@ -12,33 +12,45 @@
 :root {
   color-scheme: light;
 
-  /* Neutros con sesgo azul: un gris puro se lee como no elegido. */
-  --papel: #f6f7f9;
+  /* Marca Intechsys: carmesí para la acción y la firma de marca, carbón para el texto,
+     ámbar para lo que espera. */
+  --marca-profunda: #751326;
+  --marca: #af1839;
+  --marca-viva: #e51e4a;
+  --marca-ambar: #da830b;
+  --marca-oro: #f8b21d;
+  /* La barra de la guía de marca: profundo → vivo → profundo. */
+  --marca-banda: linear-gradient(90deg, var(--marca-profunda), var(--marca-viva) 50%, var(--marca-profunda));
+
+  /* Neutros cálidos, de la familia del carbón de la marca. */
+  --papel: #f7f6f4;
   --superficie: #ffffff;
-  --superficie-2: #eef1f5;
-  --superficie-3: #e4e9ef;
-  --borde: #dde3ea;
-  --borde-fuerte: #c3ccd7;
+  --superficie-2: #f0efec;
+  --superficie-3: #e7e5e1;
+  --borde: #e4e2de;
+  --borde-fuerte: #cdcac5;
 
-  --tinta: #141a22;
-  --tinta-media: #47535f;
-  --tinta-suave: #6b7885;
+  --tinta: #1f1f1d;
+  --tinta-media: #3c3c3b;
+  --tinta-suave: #5a5958;
 
-  --acento: #1f4e79;
-  --acento-vivo: #2b6ba8;
-  --acento-tenue: #e6eef6;
+  /* El carmesí medio con texto blanco pasa AA; al pasar el mouse, el profundo. */
+  --acento: #af1839;
+  --acento-vivo: #751326;
+  --acento-tenue: #fbebee;
   --acento-contraste: #ffffff;
 
-  /* Semánticos, independientes del acento. */
+  /* Semánticos. "En espera" es el ámbar de la marca, oscurecido para leerse como texto;
+     "mal" es el carmesí profundo, distinto del botón principal. */
   --bien: #0f7b5f;
   --bien-tenue: #e2f3ec;
-  --espera: #8a5a00;
-  --espera-tenue: #fbf0dc;
-  --mal: #b3261e;
-  --mal-tenue: #fbeae8;
+  --espera: #a35f07;
+  --espera-tenue: #fdf1dc;
+  --mal: #751326;
+  --mal-tenue: #f9e8eb;
 
-  --sombra: 0 1px 2px rgb(20 26 34 / .06), 0 8px 24px -12px rgb(20 26 34 / .18);
-  --sombra-alta: 0 2px 4px rgb(20 26 34 / .08), 0 18px 40px -18px rgb(20 26 34 / .28);
+  --sombra: 0 1px 2px rgb(31 31 29 / .06), 0 8px 24px -12px rgb(31 31 29 / .18);
+  --sombra-alta: 0 2px 4px rgb(31 31 29 / .08), 0 18px 40px -18px rgb(31 31 29 / .28);
 
   --radio: 10px;
   --radio-sm: 7px;
@@ -53,28 +65,29 @@
   :root:not([data-theme="light"]) {
     color-scheme: dark;
 
-    --papel: #0b1017;
-    --superficie: #1a2431;
-    --superficie-2: #22303f;
-    --superficie-3: #2c3b4c;
-    --borde: #303f50;
-    --borde-fuerte: #47596d;
+    --papel: #181817;
+    --superficie: #232321;
+    --superficie-2: #2b2b29;
+    --superficie-3: #353533;
+    --borde: #353533;
+    --borde-fuerte: #4a4947;
 
-    --tinta: #eef3f9;
-    --tinta-media: #bcc9d7;
-    --tinta-suave: #94a4b6;
+    --tinta: #f3f2ef;
+    --tinta-media: #c9c7c3;
+    --tinta-suave: #9a9894;
 
-    --acento: #7db6e8;
-    --acento-vivo: #9bcaf2;
-    --acento-tenue: #172f45;
-    --acento-contraste: #0b1017;
+    /* Sobre carbón brilla el carmesí vivo. */
+    --acento: #e51e4a;
+    --acento-vivo: #f2456b;
+    --acento-tenue: #3a1620;
+    --acento-contraste: #ffffff;
 
     --bien: #5cd0a6;
     --bien-tenue: #12332a;
-    --espera: #e8bb68;
-    --espera-tenue: #342a16;
-    --mal: #f68f86;
-    --mal-tenue: #3b1d1e;
+    --espera: #f8b21d;
+    --espera-tenue: #3a2b0e;
+    --mal: #f2456b;
+    --mal-tenue: #3d1520;
 
     --sombra: 0 1px 2px rgb(0 0 0 / .4), 0 8px 24px -12px rgb(0 0 0 / .6);
     --sombra-alta: 0 2px 4px rgb(0 0 0 / .45), 0 18px 40px -18px rgb(0 0 0 / .7);
@@ -84,28 +97,29 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --papel: #0b1017;
-  --superficie: #1a2431;
-  --superficie-2: #22303f;
-  --superficie-3: #2c3b4c;
-  --borde: #303f50;
-  --borde-fuerte: #47596d;
+  --papel: #181817;
+  --superficie: #232321;
+  --superficie-2: #2b2b29;
+  --superficie-3: #353533;
+  --borde: #353533;
+  --borde-fuerte: #4a4947;
 
-  --tinta: #eef3f9;
-  --tinta-media: #bcc9d7;
-  --tinta-suave: #94a4b6;
+  --tinta: #f3f2ef;
+  --tinta-media: #c9c7c3;
+  --tinta-suave: #9a9894;
 
-  --acento: #7db6e8;
-  --acento-vivo: #9bcaf2;
-  --acento-tenue: #172f45;
-  --acento-contraste: #0b1017;
+  /* Sobre carbón brilla el carmesí vivo. */
+  --acento: #e51e4a;
+  --acento-vivo: #f2456b;
+  --acento-tenue: #3a1620;
+  --acento-contraste: #ffffff;
 
   --bien: #5cd0a6;
   --bien-tenue: #12332a;
-  --espera: #e8bb68;
-  --espera-tenue: #342a16;
-  --mal: #f68f86;
-  --mal-tenue: #3b1d1e;
+  --espera: #f8b21d;
+  --espera-tenue: #3a2b0e;
+  --mal: #f2456b;
+  --mal-tenue: #3d1520;
 
   --sombra: 0 1px 2px rgb(0 0 0 / .4), 0 8px 24px -12px rgb(0 0 0 / .6);
   --sombra-alta: 0 2px 4px rgb(0 0 0 / .45), 0 18px 40px -18px rgb(0 0 0 / .7);
@@ -221,6 +235,16 @@ body {
 
 /* ---------- Ingreso ---------- */
 .ingreso { min-height: 100dvh; display: grid; place-items: center; padding: 24px; }
+/* La franja de la guía de marca, arriba de la tarjeta. */
+.ingreso-caja { position: relative; overflow: hidden; }
+.ingreso-caja::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: var(--marca-banda);
+}
+
 .ingreso-caja {
   width: 100%;
   max-width: 392px;
@@ -252,6 +276,14 @@ body {
   background: color-mix(in srgb, var(--superficie) 88%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--borde);
+}
+/* La franja de la guía de marca, bajo la barra: la firma de Intechsys en cada pantalla. */
+.barra::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 3px;
+  background: var(--marca-banda);
 }
 .marca { display: flex; align-items: baseline; gap: 10px; }
 .marca-nombre { font-family: var(--display); font-weight: 600; font-size: 17px; letter-spacing: -.01em; }
@@ -481,10 +513,10 @@ object.marco-pdf > .vacio { padding: 48px 24px; }
 .lienzo-guia {
   position: absolute; left: 0; right: 0; bottom: 30px;
   display: flex; flex-direction: column; align-items: center; gap: 6px;
-  pointer-events: none; color: #6b7885; font-size: 13px;
+  pointer-events: none; color: #5a5958; font-size: 13px;
   transition: opacity .15s ease;
 }
-.lienzo-guia .linea { width: 72%; border-top: 1px solid #c3ccd7; }
+.lienzo-guia .linea { width: 72%; border-top: 1px solid #cdcac5; }
 .lienzo-marco.firmado .lienzo-guia { opacity: 0; }
 
 .firmar-envio {
@@ -492,7 +524,7 @@ object.marco-pdf > .vacio { padding: 48px 24px; }
   margin: 20px -16px 0; padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
   background: var(--superficie);
   border-top: 1px solid var(--borde);
-  box-shadow: 0 -8px 24px -16px rgb(20 26 34 / .35);
+  box-shadow: 0 -8px 24px -16px rgb(31 31 29 / .35);
 }
 .firmar-envio .boton { width: 100%; padding: 12px; font-size: 15px; }
 .acepto { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 14px; color: var(--tinta-media); cursor: pointer; }
@@ -507,7 +539,7 @@ object.marco-pdf > .vacio { padding: 48px 24px; }
   color: var(--tinta);
   box-shadow: var(--sombra-alta);
 }
-.dialogo::backdrop { background: rgb(11 16 23 / .55); }
+.dialogo::backdrop { background: rgb(31 31 29 / .55); }
 .dialogo h2 { font-size: 20px; }
 .dialogo p { color: var(--tinta-media); font-size: 14px; }
 .dialogo .acciones-formulario { margin-top: 18px; }
@@ -541,7 +573,7 @@ object.marco-pdf > .vacio { padding: 48px 24px; }
 .mapa-capa { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; background: var(--superficie-2); }
 .mapa-vacio { display: grid; place-items: center; padding: 20px; text-align: center; }
 /* El globo de Google es blanco en cualquier tema: el texto se fija oscuro para que se lea. */
-.mapa-globo { color: #141a22; font: 13px/1.5 var(--texto); display: flex; flex-direction: column; gap: 2px; }
+.mapa-globo { color: #1f1f1d; font: 13px/1.5 var(--texto); display: flex; flex-direction: column; gap: 2px; }
 
 .geo-detalle { position: sticky; top: 76px; }
 .geo-titulo { font-size: 19px; }

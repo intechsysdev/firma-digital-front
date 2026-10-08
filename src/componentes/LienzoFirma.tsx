@@ -50,8 +50,8 @@ export function LienzoFirma({ ref, alCambiar }: { ref: Ref<ControlFirma>; alCamb
       // Tinta sobre papel en cualquier tema: el lienzo es blanco siempre, igual que el acta.
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
-      ctx.strokeStyle = "#111827";
-      ctx.fillStyle = "#111827";
+      ctx.strokeStyle = "#1f1f1d";
+      ctx.fillStyle = "#1f1f1d";
       ctx.lineWidth = 2.4;
 
       redibujar();

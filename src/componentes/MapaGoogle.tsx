@@ -163,7 +163,7 @@ export function MapaGoogle({
       dibujados.current.push(new maps.Polyline({
         map: m,
         path: recorrido,
-        strokeColor: "#2b6ba8",
+        strokeColor: "#af1839",
         strokeOpacity: 0.9,
         strokeWeight: 4,
         icons: [{ icon: { path: maps.SymbolPath.FORWARD_CLOSED_ARROW, scale: 2.2 }, repeat: "90px" }],
@@ -171,7 +171,7 @@ export function MapaGoogle({
 
       const extremos: [LatLng, string, string][] = [
         [recorrido[0], "#0f7b5f", "Inicio del recorrido"],
-        [recorrido[recorrido.length - 1], "#141a22", "Último punto del recorrido"],
+        [recorrido[recorrido.length - 1], "#1f1f1d", "Último punto del recorrido"],
       ];
       for (const [posicion, color, titulo] of extremos) {
         dibujados.current.push(new maps.Marker({
