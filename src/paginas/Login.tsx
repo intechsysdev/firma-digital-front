@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import type { FormEvent } from "react";
 import { useSesion } from "../sesion/SesionContexto";
-import { Aviso } from "../componentes/Cargando";
+import { Aviso, Cargando } from "../componentes/Cargando";
 import { SelectorTema } from "../componentes/SelectorTema";
-import { ssoDisponible } from "../api/sso";
+import { acabaDeSalir, marcarEntradaAutomatica, puedeEntrarSolo, ssoDisponible } from "../api/sso";
 
 export function Login() {
   const { entrar } = useSesion();
@@ -12,6 +12,15 @@ export function Login() {
   const [clave, setClave] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const navigate = useNavigate();
+
+  // Con sesión en One se entra sin pasar por este formulario: es el inicio de sesión único.
+  const [entrandoSolo] = useState(puedeEntrarSolo);
+  useEffect(() => {
+    if (!entrandoSolo) return;
+    marcarEntradaAutomatica();
+    navigate("/sso", { replace: true });
+  }, [entrandoSolo, navigate]);
 
   async function enviar(evento: FormEvent) {
     evento.preventDefault();
@@ -26,6 +35,8 @@ export function Login() {
       setEnviando(false);
     }
   }
+
+  if (entrandoSolo) return <Cargando texto="Conectando con One…" />;
 
   return (
     <div className="ingreso">
@@ -67,9 +78,10 @@ export function Login() {
           {enviando ? "Entrando…" : "Entrar"}
         </button>
 
-        {/* Con sesión abierta en One no hace falta escribir nada: se entra con esa. */}
+        {/* Con sesión abierta en One no hace falta escribir nada: se entra con esa. Tras salir de
+            la consola, One pregunta antes con qué cuenta seguir. */}
         {ssoDisponible() && (
-          <Link to="/sso?cuenta=elegir" className="boton boton-secundario ingreso-sso">Entrar con One</Link>
+          <Link to={acabaDeSalir() ? "/sso?cuenta=elegir" : "/sso"} className="boton boton-secundario ingreso-sso">Entrar con One</Link>
         )}
       </form>
     </div>
