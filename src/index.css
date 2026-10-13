@@ -367,6 +367,14 @@ body {
 .pastilla-bien { background: var(--bien-tenue); color: var(--bien); }
 .pastilla-espera { background: var(--espera-tenue); color: var(--espera); }
 .pastilla-mal { background: var(--mal-tenue); color: var(--mal); }
+.pastilla-neutra { background: var(--superficie-2); color: var(--tinta-suave); }
+
+/* ---------- Nueva acta: dónde se firma ---------- */
+.opciones-firma { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 24px; }
+.opciones-firma > div { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.opciones-firma h3 { margin: 0; font-family: var(--display); font-size: 16px; }
+.opciones-firma .nota { margin: 0; }
+.opciones-firma .acepto { margin: 0; }
 
 /* ---------- Detalle ---------- */
 .detalle { display: grid; grid-template-columns: minmax(300px, 380px) 1fr; gap: 20px; align-items: start; }
@@ -429,6 +437,13 @@ object.marco-pdf > .vacio { padding: 48px 24px; }
 .navegacion a:hover { background: var(--superficie-2); color: var(--tinta); }
 .navegacion a.active { background: var(--acento-tenue); color: var(--acento); }
 @media (max-width: 760px) { .navegacion a { padding: 7px 9px; } }
+/* En pantallas angostas el menú baja a su propia fila y se desliza de lado si no cabe: con cinco
+   módulos la barra ya no entra en una tableta vertical ni en un celular. */
+@media (max-width: 900px) {
+  .barra { flex-wrap: wrap; row-gap: 8px; padding: 10px 16px; }
+  .navegacion { order: 3; width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .navegacion a { white-space: nowrap; }
+}
 
 /* ---------- Formularios de administración ---------- */
 .formulario { margin-bottom: 22px; }

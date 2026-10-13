@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { descargarActa, firmar, obtenerFormulario, rechazar } from "../api/firmas";
 import type { DatosEditables, FirmaRegistrada, FormularioFirma } from "../api/firmas";
 import { Aviso, Cargando } from "../componentes/Cargando";
@@ -39,6 +39,8 @@ function fechaLarga(fecha: Date | string) {
 
 export function FirmarActa() {
   const { token = "" } = useParams();
+  // Abierta desde la consola para firmar en esa misma pantalla: quien la abrió necesita volver.
+  const desdeConsola = useSearchParams()[0].get("desde") === "consola";
 
   const [formulario, setFormulario] = useState<FormularioFirma | null>(null);
   const [errorCarga, setErrorCarga] = useState<string | null>(null);
@@ -62,7 +64,10 @@ export function FirmarActa() {
           <span className="marca-nombre">Acta de entrega</span>
           {formulario && <span className="rotulo">{formulario.empresa}</span>}
         </div>
-        <SelectorTema />
+        <div className="barra-derecha">
+          {desdeConsola && <Link className="boton boton-secundario boton-chico" to="/equipos">Volver a la consola</Link>}
+          <SelectorTema />
+        </div>
       </header>
 
       <main className="firmar-contenido">
