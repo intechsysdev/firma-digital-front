@@ -58,11 +58,22 @@ export interface DatosActa {
   ciudadFirma: string;
 }
 
+/** Un campo del acta que sale de un atributo de MobiControl, con el tipo que tiene allá. */
+export interface CampoMobiControl {
+  campo: keyof DatosActa;
+  atributo: string;
+  /** Text, Enumerator, Float, Boolean o Date, como lo nombra MobiControl. */
+  tipo: string;
+  opciones: string[];
+}
+
 export interface PrecargaActa {
   equipo: EquipoConsola;
   datos: { [K in keyof DatosActa]: string | null };
   /** Campos que salen de un atributo de MobiControl: los únicos que se pueden devolver allá. */
   atributosEnMobiControl: (keyof DatosActa)[];
+  /** Tipo y opciones de cada campo con atributo: las listas se muestran como combos. */
+  campos: CampoMobiControl[];
   puedeActualizarMobiControl: boolean;
   correoConfigurado: boolean;
 }

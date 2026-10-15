@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { crearActa, precargarActa, rutaFirma } from "../api/equipos";
 import type { ActaCreada, DatosActa, PrecargaActa } from "../api/equipos";
 import { Aviso, Cargando } from "../componentes/Cargando";
+import { CampoLista } from "../componentes/CampoLista";
 import { fechaCorta } from "../componentes/Etiquetas";
 
 type Campo = { clave: keyof DatosActa; etiqueta: string; dato?: boolean; tipo?: string; requerido?: boolean };
@@ -135,6 +136,33 @@ function Formulario({ deviceId, precarga }: { deviceId: string; precarga: Precar
 
   if (creada) return <EnlaceCreado creada={creada} correo={datos.correo.trim()} />;
 
+  // El control sigue al tipo del atributo en MobiControl: las listas son combos con sus opciones
+  // (así no se escribe un valor que MobiControl rechazaría al corregirlo allá) y los números se
+  // escriben con teclado numérico.
+  const control = (campo: Campo) => {
+    const definicion = precarga.campos.find((c) => c.campo === campo.clave);
+    const cambiar = (valor: string) => setDatos({ ...datos, [campo.clave]: valor });
+    const id = `acta-${campo.clave}`;
+
+    if (definicion && (definicion.tipo === "Enumerator" || definicion.tipo === "Boolean"))
+      return (
+        <CampoLista id={id} valor={datos[campo.clave]} opciones={definicion.opciones}
+          siNo={definicion.tipo === "Boolean"} alCambiar={cambiar} />
+      );
+
+    return (
+      <input
+        id={id}
+        className={`campo${campo.dato || definicion?.tipo === "Float" ? " dato" : ""}`}
+        type={campo.tipo ?? "text"}
+        inputMode={definicion?.tipo === "Float" ? "decimal" : undefined}
+        required={campo.requerido}
+        value={datos[campo.clave]}
+        onChange={(e) => cambiar(e.target.value)}
+      />
+    );
+  };
+
   const campos = (lista: Campo[]) => (
     <div className="rejilla-campos">
       {lista.map((campo) => (
@@ -144,14 +172,7 @@ function Formulario({ deviceId, precarga }: { deviceId: string; precarga: Precar
             {campo.requerido && " *"}
             {cambiado(campo.clave) && <span className="marca-cambio">corregido</span>}
           </span>
-          <input
-            id={`acta-${campo.clave}`}
-            className={`campo${campo.dato ? " dato" : ""}`}
-            type={campo.tipo ?? "text"}
-            required={campo.requerido}
-            value={datos[campo.clave]}
-            onChange={(e) => setDatos({ ...datos, [campo.clave]: e.target.value })}
-          />
+          {control(campo)}
         </label>
       ))}
     </div>

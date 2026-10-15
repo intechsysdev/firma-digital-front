@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { guardarValores, valoresDeEquipo } from "../api/atributos";
 import type { ValorAtributo, ValoresEquipo } from "../api/atributos";
 import { Aviso } from "./Cargando";
+import { CampoLista } from "./CampoLista";
 
 const SI_NO: Record<string, string> = { true: "Sí", false: "No" };
 
@@ -135,19 +136,10 @@ function CampoValor({
 
   switch (valor.tipo) {
     case "Boolean":
-      return (
-        <select className={clase} aria-label={etiqueta} value={actual.toLowerCase()} onChange={(e) => alCambiar(e.target.value)}>
-          {!actual && <option value="">—</option>}
-          <option value="true">Sí</option>
-          <option value="false">No</option>
-        </select>
-      );
     case "Enumerator":
       return (
-        <select className={clase} aria-label={etiqueta} value={actual} onChange={(e) => alCambiar(e.target.value)}>
-          {!actual && <option value="">—</option>}
-          {valor.opciones.map((o) => <option key={o} value={o}>{o}</option>)}
-        </select>
+        <CampoLista className={clase} etiqueta={etiqueta} valor={actual} opciones={valor.opciones}
+          siNo={valor.tipo === "Boolean"} alCambiar={alCambiar} />
       );
     case "Date":
       return <input className={clase} aria-label={etiqueta} type="date" value={actual.slice(0, 10)} onChange={(e) => alCambiar(e.target.value)} />;

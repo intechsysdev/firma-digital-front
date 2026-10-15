@@ -29,7 +29,10 @@ export interface DatosEditables {
 }
 
 /** Los datos tal como los precargó el sistema de origen. */
-export type DatosSolicitud = { deviceId: string | null } & { [K in keyof DatosEditables]: string | null };
+export type DatosSolicitud = { deviceId: string | null } & { [K in keyof DatosEditables]: string | null } & {
+  /** Opciones de los campos que en MobiControl son listas. Solo las traen los enlaces creados en la consola. */
+  listas?: Partial<Record<keyof DatosEditables, string[]>> | null;
+};
 
 export interface FormularioFirma {
   estado: EstadoSolicitud;

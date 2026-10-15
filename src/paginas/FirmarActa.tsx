@@ -4,6 +4,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { descargarActa, firmar, obtenerFormulario, rechazar } from "../api/firmas";
 import type { DatosEditables, FirmaRegistrada, FormularioFirma } from "../api/firmas";
 import { Aviso, Cargando } from "../componentes/Cargando";
+import { CampoLista } from "../componentes/CampoLista";
 import { LienzoFirma } from "../componentes/LienzoFirma";
 import type { ControlFirma } from "../componentes/LienzoFirma";
 import { SelectorTema } from "../componentes/SelectorTema";
@@ -217,14 +218,24 @@ function Formulario({ token, formulario }: { token: string; formulario: Formular
               {campo.etiqueta}
               {cambiado(campo.clave) && <span className="marca-cambio">corregido</span>}
             </span>
-            <input
-              className={`campo${campo.dato ? " dato" : ""}`}
-              type={campo.tipo ?? "text"}
-              inputMode={campo.modo}
-              placeholder={original[campo.clave] ? undefined : "Sin registrar"}
-              value={datos[campo.clave]}
-              onChange={(e) => setDatos({ ...datos, [campo.clave]: e.target.value })}
-            />
+            {original.listas?.[campo.clave] ? (
+              // En MobiControl es una lista: se elige entre sus opciones, como en la consola.
+              <CampoLista
+                valor={datos[campo.clave]}
+                opciones={original.listas[campo.clave] ?? []}
+                siNo={original.listas[campo.clave]?.join() === "true,false"}
+                alCambiar={(valor) => setDatos({ ...datos, [campo.clave]: valor })}
+              />
+            ) : (
+              <input
+                className={`campo${campo.dato ? " dato" : ""}`}
+                type={campo.tipo ?? "text"}
+                inputMode={campo.modo}
+                placeholder={original[campo.clave] ? undefined : "Sin registrar"}
+                value={datos[campo.clave]}
+                onChange={(e) => setDatos({ ...datos, [campo.clave]: e.target.value })}
+              />
+            )}
           </label>
         ))}
       </div>
