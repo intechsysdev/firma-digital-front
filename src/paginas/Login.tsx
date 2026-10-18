@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { FormEvent } from "react";
+import { ErrorDobleFactor } from "../api/cliente";
 import { useSesion } from "../sesion/SesionContexto";
 import { Aviso, Cargando } from "../componentes/Cargando";
 import { SelectorTema } from "../componentes/SelectorTema";
@@ -30,6 +31,11 @@ export function Login() {
     try {
       await entrar(correo.trim(), clave);
     } catch (e) {
+      // Con verificación en dos pasos se entra por One, que pide el código de la app.
+      if (e instanceof ErrorDobleFactor && ssoDisponible()) {
+        navigate("/sso", { replace: true });
+        return;
+      }
       setError(e instanceof Error ? e.message : "No se pudo entrar. Intenta de nuevo.");
     } finally {
       setEnviando(false);
