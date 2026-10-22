@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
-  actualizarVinculo, cambiarEstadoVinculo, comprobarVinculo, crearVinculo, listarVinculos, rotarLlave,
+  actualizarVinculo, cambiarEstadoVinculo, comprobarVinculo, crearVinculo, enviarCorreoPrueba, listarVinculos, rotarLlave,
 } from "../api/plataforma";
-import type { Comprobacion, Vinculo, VinculoAlta } from "../api/plataforma";
+import type { Comprobacion, ResultadoCorreoPrueba, Vinculo, VinculoAlta } from "../api/plataforma";
 import { Aviso, Cargando } from "../componentes/Cargando";
 import { fechaCorta } from "../componentes/Etiquetas";
 import { LlaveRevelada } from "../componentes/LlaveRevelada";
@@ -17,6 +17,7 @@ export function Vinculos() {
   const [creando, setCreando] = useState(false);
   const [llave, setLlave] = useState<{ empresa: string; valor: string } | null>(null);
   const [comprobaciones, setComprobaciones] = useState<Record<number, Comprobacion>>({});
+  const [probandoCorreo, setProbandoCorreo] = useState<Vinculo | null>(null);
 
   const cargar = useCallback(async () => {
     setCargando(true);
@@ -80,6 +81,8 @@ export function Vinculos() {
           alCancelar={() => { setCreando(false); setEditando(null); }}
         />
       )}
+
+      {probandoCorreo && <PruebaCorreo vinculo={probandoCorreo} alCerrar={() => setProbandoCorreo(null)} />}
 
       {cargando && <Cargando texto="Cargando vínculos…" />}
 
@@ -145,6 +148,10 @@ export function Vinculos() {
                           Comprobar
                         </button>
                         <button type="button" className="boton boton-secundario boton-chico"
+                          onClick={() => { setProbandoCorreo(vinculo); setCreando(false); setEditando(null); }}>
+                          Probar correo
+                        </button>
+                        <button type="button" className="boton boton-secundario boton-chico"
                           onClick={() => { setEditando(vinculo); setCreando(false); }}>
                           Editar
                         </button>
@@ -173,6 +180,77 @@ export function Vinculos() {
         </div>
       )}
     </section>
+  );
+}
+
+/**
+ * Manda un correo de prueba con la configuración de Infobip que la empresa tiene en One. Muestra lo
+ * que responde Infobip tal cual: un remitente sin verificar o una llave mal copiada se ven ahí.
+ */
+function PruebaCorreo({ vinculo, alCerrar }: { vinculo: Vinculo; alCerrar: () => void }) {
+  const [destino, setDestino] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [resultado, setResultado] = useState<ResultadoCorreoPrueba | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function enviar(evento: FormEvent) {
+    evento.preventDefault();
+    setEnviando(true);
+    setError(null);
+    setResultado(null);
+    try {
+      setResultado(await enviarCorreoPrueba(vinculo.empresaId, destino.trim()));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo enviar el correo de prueba.");
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  return (
+    <form className="panel formulario" onSubmit={enviar}>
+      <div className="panel-barra">
+        <span className="rotulo">Probar el correo de {vinculo.nombre}</span>
+      </div>
+
+      <div className="panel-cuerpo">
+        <p className="nota" style={{ marginTop: 0 }}>
+          Se envía con las variables de correo que la empresa tiene en One (Firma digital → Variables):
+          {" "}<code>INFOBIP_BASE_URL</code>, <code>INFOBIP_API_KEY</code>, <code>INFOBIP_REMITENTE</code> y,
+          si están, <code>INFOBIP_NOMBRE_REMITENTE</code> y <code>INFOBIP_RESPONDER_A</code>.
+        </p>
+
+        {error && <Aviso tipo="error">{error}</Aviso>}
+        {resultado && (
+          <Aviso tipo={resultado.enviado ? "info" : "error"}>
+            {resultado.enviado
+              ? `Infobip lo aceptó${resultado.codigoHttp ? ` (${resultado.codigoHttp})` : ""}. Revisa la bandeja de ${destino.trim()}, y la de spam.`
+              : `No se envió${resultado.codigoHttp ? ` (Infobip respondió ${resultado.codigoHttp})` : ""}: ${resultado.detalle ?? "sin detalle"}`}
+            {(resultado.remitente || resultado.responderA) && (
+              <span className="sub dato" style={{ display: "block", marginTop: "0.35rem" }}>
+                Remitente: {resultado.remitente ?? "—"} · Responder a: {resultado.responderA ?? "el remitente"} ·
+                Seguimiento: {resultado.seguimiento ? "sí" : "no"}
+              </span>
+            )}
+          </Aviso>
+        )}
+
+        <div className="rejilla-campos">
+          <label className="ancho-completo">
+            <span className="rotulo">Enviar a</span>
+            <input className="campo" type="email" required autoFocus placeholder="nombre@empresa.com"
+              value={destino} onChange={(e) => setDestino(e.target.value)} />
+          </label>
+        </div>
+
+        <div className="acciones-formulario">
+          <button type="button" className="boton boton-secundario" onClick={alCerrar}>Cerrar</button>
+          <button type="submit" className="boton boton-primario" disabled={enviando}>
+            {enviando ? "Enviando…" : "Enviar prueba"}
+          </button>
+        </div>
+      </div>
+    </form>
   );
 }
 

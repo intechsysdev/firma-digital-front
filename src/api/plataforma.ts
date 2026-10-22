@@ -73,6 +73,19 @@ export const actualizarVinculo = (empresaId: number, datos: VinculoAlta) =>
 export const comprobarVinculo = (empresaId: number) =>
   obtenerJson<Comprobacion>(`/api/v1/vinculos/${empresaId}/comprobacion`);
 
+/** Lo que respondió Infobip al correo de prueba. */
+export interface ResultadoCorreoPrueba {
+  enviado: boolean;
+  codigoHttp: number | null;
+  detalle: string | null;
+  remitente: string | null;
+  responderA: string | null;
+  seguimiento: boolean;
+}
+
+export const enviarCorreoPrueba = (empresaId: number, destino: string) =>
+  enviarJson<ResultadoCorreoPrueba>(`/api/v1/vinculos/${empresaId}/correo-prueba`, { destino });
+
 export const rotarLlave = (empresaId: number) =>
   enviarJson<VinculoCreado>(`/api/v1/vinculos/${empresaId}/rotar-llave`);
 
