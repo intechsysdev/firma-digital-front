@@ -8,6 +8,7 @@ import { CampoLista } from "../componentes/CampoLista";
 import { LienzoFirma } from "../componentes/LienzoFirma";
 import type { ControlFirma } from "../componentes/LienzoFirma";
 import { SelectorTema } from "../componentes/SelectorTema";
+import { MarcaCompacta } from "../componentes/Marca";
 
 type Campo = { clave: keyof DatosEditables; etiqueta: string; dato?: boolean; tipo?: string; modo?: "numeric" | "tel" | "email" };
 
@@ -62,8 +63,11 @@ export function FirmarActa() {
     <div className="firmar">
       <header className="firmar-barra">
         <div className="marca">
-          <span className="marca-nombre">Acta de entrega</span>
-          {formulario && <span className="rotulo">{formulario.empresa}</span>}
+          <MarcaCompacta />
+          <div className="marca-texto">
+            <span className="marca-nombre">Acta de entrega</span>
+            {formulario && <span className="rotulo">{formulario.empresa}</span>}
+          </div>
         </div>
         <div className="barra-derecha">
           {desdeConsola && <Link className="boton boton-secundario boton-chico" to="/equipos">Volver a la consola</Link>}

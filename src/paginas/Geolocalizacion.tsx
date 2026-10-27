@@ -11,7 +11,7 @@ import type { MarcadorMapa } from "../componentes/MapaGoogle";
 
 /* Colores del mapa. Van en hexadecimal porque los consume Google Maps, no la hoja de estilos. */
 const COLOR_EN_LINEA = "#0f7b5f";
-const COLOR_DESCONECTADO = "#e51e4a";
+const COLOR_DESCONECTADO = "#e51e49";
 
 type FiltroEstado = "todos" | "enLinea" | "desconectados";
 type FiltroActa = "todos" | "con" | "sin";

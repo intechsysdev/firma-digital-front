@@ -10,6 +10,7 @@ import { SsoInicio, SsoRetorno } from "./paginas/Sso";
 import { Login } from "./paginas/Login";
 import { Vinculos } from "./paginas/Vinculos";
 import { SelectorTema } from "./componentes/SelectorTema";
+import { MarcaCompacta } from "./componentes/Marca";
 import { Aviso, Cargando } from "./componentes/Cargando";
 import { useSesion } from "./sesion/SesionContexto";
 
@@ -47,8 +48,11 @@ function Marco({ children }: { children: React.ReactNode }) {
     <>
       <header className="barra">
         <div className="marca">
-          <span className="marca-nombre">Actas de entrega</span>
-          <span className="rotulo">{empresaActiva?.nombre ?? "Sin empresa"}</span>
+          <MarcaCompacta />
+          <div className="marca-texto">
+            <span className="marca-nombre">Firma digital</span>
+            <span className="rotulo">{empresaActiva?.nombre ?? "Sin empresa"}</span>
+          </div>
         </div>
 
         <nav className="navegacion">

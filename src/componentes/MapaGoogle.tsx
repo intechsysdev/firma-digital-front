@@ -171,7 +171,7 @@ export function MapaGoogle({
 
       const extremos: [LatLng, string, string][] = [
         [recorrido[0], "#0f7b5f", "Inicio del recorrido"],
-        [recorrido[recorrido.length - 1], "#1f1f1d", "Último punto del recorrido"],
+        [recorrido[recorrido.length - 1], "#1e1f1d", "Último punto del recorrido"],
       ];
       for (const [posicion, color, titulo] of extremos) {
         dibujados.current.push(new maps.Marker({

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { completarSso, iniciarSso, ssoDisponible } from "../api/sso";
 import { Cargando } from "../componentes/Cargando";
+import { LogoEntrada } from "../componentes/Marca";
 
 /**
  * Ruta de inicio que se registra en One como "URL de inicio" de la app. Es a donde lleva la
@@ -60,6 +61,7 @@ function Paso({ texto }: { texto: string }) {
 function Fallo({ mensaje }: { mensaje: string }) {
   return (
     <div className="ingreso">
+      <LogoEntrada />
       <div className="ingreso-caja vacio">
         <h2>No se pudo entrar con One</h2>
         <p>{mensaje}</p>

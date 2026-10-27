@@ -5,6 +5,7 @@ import { ErrorDobleFactor } from "../api/cliente";
 import { useSesion } from "../sesion/SesionContexto";
 import { Aviso, Cargando } from "../componentes/Cargando";
 import { SelectorTema } from "../componentes/SelectorTema";
+import { LogoEntrada } from "../componentes/Marca";
 import { acabaDeSalir, marcarEntradaAutomatica, puedeEntrarSolo, ssoDisponible } from "../api/sso";
 
 export function Login() {
@@ -46,9 +47,10 @@ export function Login() {
 
   return (
     <div className="ingreso">
+      <LogoEntrada />
       <form className="ingreso-caja" onSubmit={enviar}>
         <div className="ingreso-marca">
-          <span className="rotulo">Intechsys</span>
+          <span className="rotulo">Firma digital</span>
           <SelectorTema />
         </div>
 
