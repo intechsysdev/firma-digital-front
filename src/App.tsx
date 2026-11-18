@@ -1,4 +1,7 @@
+import { useEffect, useRef, useState } from "react";
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { FileText, Link2, LogOut, MapPin, Menu, SlidersHorizontal, Smartphone, X } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { DetalleEntrega } from "./paginas/DetalleEntrega";
 import { Entregas } from "./paginas/Entregas";
 import { Equipos } from "./paginas/Equipos";
@@ -41,43 +44,155 @@ function SelectorEmpresa() {
   );
 }
 
-function Marco({ children }: { children: React.ReactNode }) {
+function EntradaMenu({
+  a,
+  icono: Icono,
+  alElegir,
+  children,
+}: {
+  a: string;
+  icono: LucideIcon;
+  alElegir?: () => void;
+  children: React.ReactNode;
+}) {
+  // NavLink marca la activa con la clase active y aria-current="page"; la barrita la pone el CSS.
+  return (
+    <NavLink to={a} className="lateral-entrada" onClick={alElegir}>
+      <Icono aria-hidden />
+      {children}
+    </NavLink>
+  );
+}
+
+/**
+ * Contenido del menú lateral. Es el mismo en el panel fijo de escritorio y en el cajón de las
+ * pantallas angostas; `alElegir` cierra el cajón al tocar una entrada.
+ */
+function MenuLateral({ alElegir }: { alElegir?: () => void }) {
   const { correo, empresaActiva, esAdministradorPlataforma, salir } = useSesion();
 
   return (
-    <>
-      <header className="barra">
-        <div className="marca">
+    <div className="lateral-menu">
+      <div className="lateral-cabeza">
+        <div className="lateral-marca">
           <MarcaCompacta />
-          <div className="marca-texto">
-            <span className="marca-nombre">Firma digital</span>
-            <span className="rotulo">{empresaActiva?.nombre ?? "Sin empresa"}</span>
+          <div className="lateral-marca-texto">
+            <span className="lateral-producto">Firma digital</span>
+            <span className="lateral-empresa">{empresaActiva?.nombre ?? "Sin empresa"}</span>
           </div>
         </div>
+        <SelectorEmpresa />
+      </div>
 
-        <nav className="navegacion">
-          <NavLink to="/entregas">Actas</NavLink>
-          {empresaActiva && <NavLink to="/equipos">Equipos</NavLink>}
-          <NavLink to="/geolocalizacion">Geolocalización</NavLink>
-          {empresaActiva && <NavLink to="/atributos">Atributos</NavLink>}
-          {/* Los vínculos con One son cosa de plataforma: las empresas y sus usuarios se
-              administran en el portal de One, no aquí. */}
-          {esAdministradorPlataforma && <NavLink to="/vinculos">Vínculos</NavLink>}
-        </nav>
+      <nav className="lateral-nav" aria-label="Principal">
+        <div className="lateral-grupo">
+          {/* Con un solo grupo el título sobra; solo separa cuando aparece el de plataforma. */}
+          {esAdministradorPlataforma && <p className="lateral-titulo">Operación</p>}
+          <EntradaMenu a="/entregas" icono={FileText} alElegir={alElegir}>Actas</EntradaMenu>
+          {empresaActiva && <EntradaMenu a="/equipos" icono={Smartphone} alElegir={alElegir}>Equipos</EntradaMenu>}
+          <EntradaMenu a="/geolocalizacion" icono={MapPin} alElegir={alElegir}>Geolocalización</EntradaMenu>
+          {empresaActiva && (
+            <EntradaMenu a="/atributos" icono={SlidersHorizontal} alElegir={alElegir}>Atributos</EntradaMenu>
+          )}
+        </div>
 
-        <div className="barra-derecha">
-          <SelectorEmpresa />
+        {/* Los vínculos con One son cosa de plataforma: las empresas y sus usuarios se
+            administran en el portal de One, no aquí. */}
+        {esAdministradorPlataforma && (
+          <div className="lateral-grupo">
+            <p className="lateral-titulo">Plataforma</p>
+            <EntradaMenu a="/vinculos" icono={Link2} alElegir={alElegir}>Vínculos</EntradaMenu>
+          </div>
+        )}
+      </nav>
+
+      <div className="lateral-pie">
+        <span className="lateral-usuario" title={correo ?? undefined}>{correo}</span>
+        <div className="lateral-acciones">
           <SelectorTema />
-          <span className="correo">{correo}</span>
           <button type="button" className="boton boton-secundario boton-chico" onClick={salir}>
+            <LogOut size={15} aria-hidden />
             Salir
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function Marco({ children }: { children: React.ReactNode }) {
+  const { empresaActiva } = useSesion();
+  const [menuAbierto, setMenuAbierto] = useState(false);
+  const cajon = useRef<HTMLDialogElement>(null);
+  const botonMenu = useRef<HTMLButtonElement>(null);
+
+  // El cajón es un <dialog> modal: el navegador deja inerte el resto de la página, atrapa el foco
+  // y lo cierra con Escape. showModal enfoca el primer control, que puede ser el selector de
+  // empresa; el foco va a la primera entrada del menú.
+  const abrirMenu = () => {
+    cajon.current?.showModal();
+    setMenuAbierto(true);
+    cajon.current?.querySelector<HTMLElement>(".lateral-entrada")?.focus();
+  };
+  const cerrarMenu = () => cajon.current?.close();
+
+  // Si la ventana se ensancha con el cajón abierto aparece el panel fijo: el cajón sobra, y
+  // abierto dejaría la página inerte aunque no se viera.
+  useEffect(() => {
+    const ancha = window.matchMedia("(min-width: 1024px)");
+    const alCambiar = () => {
+      if (ancha.matches) cajon.current?.close();
+    };
+    ancha.addEventListener("change", alCambiar);
+    return () => ancha.removeEventListener("change", alCambiar);
+  }, []);
+
+  return (
+    <div className="consola">
+      <aside className="lateral">
+        <MenuLateral />
+      </aside>
+
+      <header className="barra-movil">
+        <button
+          ref={botonMenu}
+          type="button"
+          className="boton-menu"
+          aria-label={menuAbierto ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={menuAbierto}
+          aria-controls="menu-lateral"
+          onClick={menuAbierto ? cerrarMenu : abrirMenu}
+        >
+          {menuAbierto ? <X aria-hidden /> : <Menu aria-hidden />}
+        </button>
+        <MarcaCompacta />
+        <span className="barra-movil-nombre">Firma digital</span>
       </header>
+
+      {/* El diálogo ocupa toda la ventana y la hoja va a la izquierda: un toque fuera de la hoja
+          cae en el propio diálogo, sobre el fondo oscurecido, y lo cierra. */}
+      <dialog
+        ref={cajon}
+        id="menu-lateral"
+        className="cajon"
+        aria-label="Menú"
+        onClose={() => {
+          setMenuAbierto(false);
+          botonMenu.current?.focus();
+        }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) cerrarMenu();
+        }}
+      >
+        <div className="cajon-hoja">
+          <MenuLateral alElegir={cerrarMenu} />
+        </div>
+      </dialog>
+
       {/* La clave es la empresa: al cambiarla, las pantallas se montan de nuevo y piden sus datos
           con la empresa nueva. Sin esto seguían mostrando lo de la anterior hasta recargar. */}
       <main className="contenido" key={empresaActiva?.oneTenantId ?? "todas"}>{children}</main>
-    </>
+    </div>
   );
 }
 
@@ -137,7 +252,7 @@ function Consola() {
   return (
     <Marco>
       {!empresaActiva && !esAdministradorPlataforma && (
-        <Aviso tipo="info">Elige una empresa arriba para ver sus actas.</Aviso>
+        <Aviso tipo="info">Elige una empresa en el menú para ver sus actas.</Aviso>
       )}
 
       <Routes>
