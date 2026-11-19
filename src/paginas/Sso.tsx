@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { completarSso, iniciarSso, ssoDisponible } from "../api/sso";
-import { Cargando } from "../componentes/Cargando";
-import { LogoEntrada } from "../componentes/Marca";
+import { Aviso } from "../componentes/Cargando";
+import { MarcoEntrada, PasoEntrada } from "../componentes/MarcoEntrada";
 
 /**
  * Ruta de inicio que se registra en One como "URL de inicio" de la app. Es a donde lleva la
@@ -24,7 +24,7 @@ export function SsoInicio() {
     });
   }, [params]);
 
-  return error ? <Fallo mensaje={error} /> : <Paso texto="Conectando con One…" />;
+  return error ? <Fallo mensaje={error} /> : <PasoEntrada texto="Conectando con One…" />;
 }
 
 /** Dirección de retorno registrada en One: aquí llega el código y se canjea por la sesión. */
@@ -47,28 +47,14 @@ export function SsoRetorno() {
       });
   }, [params]);
 
-  return error ? <Fallo mensaje={error} /> : <Paso texto="Entrando…" />;
-}
-
-function Paso({ texto }: { texto: string }) {
-  return (
-    <div className="ingreso">
-      <Cargando texto={texto} />
-    </div>
-  );
+  return error ? <Fallo mensaje={error} /> : <PasoEntrada texto="Entrando…" />;
 }
 
 function Fallo({ mensaje }: { mensaje: string }) {
   return (
-    <div className="ingreso">
-      <LogoEntrada />
-      <div className="ingreso-caja vacio">
-        <h2>No se pudo entrar con One</h2>
-        <p>{mensaje}</p>
-        <div className="acciones-centradas">
-          <Link to="/" className="boton boton-secundario">Ir al inicio de sesión</Link>
-        </div>
-      </div>
-    </div>
+    <MarcoEntrada titulo="No se pudo entrar con One">
+      <Aviso tipo="error">{mensaje}</Aviso>
+      <Link to="/" className="boton boton-secundario">Ir al inicio de sesión</Link>
+    </MarcoEntrada>
   );
 }

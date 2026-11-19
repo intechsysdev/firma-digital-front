@@ -14,8 +14,9 @@ import { SsoInicio, SsoRetorno } from "./paginas/Sso";
 import { Login } from "./paginas/Login";
 import { Vinculos } from "./paginas/Vinculos";
 import { SelectorTema } from "./componentes/SelectorTema";
-import { MarcaCompacta } from "./componentes/Marca";
-import { Cargando } from "./componentes/Cargando";
+import { MarcaProducto } from "./componentes/Marca";
+import { MarcoEntrada } from "./componentes/MarcoEntrada";
+import { Aviso, Cargando } from "./componentes/Cargando";
 import { TODAS_LAS_EMPRESAS, useSesion } from "./sesion/SesionContexto";
 
 function SelectorEmpresa() {
@@ -75,20 +76,19 @@ function EntradaMenu({
  * pantallas angostas; `alElegir` cierra el cajón al tocar una entrada.
  */
 function MenuLateral({ alElegir }: { alElegir?: () => void }) {
-  const { correo, empresaActiva, esAdministradorPlataforma, vistaDeTodas, salir } = useSesion();
+  const { sesion, correo, empresaActiva, esAdministradorPlataforma, vistaDeTodas, salir } = useSesion();
+  // Con varias empresas el selector ya muestra la activa: el nombre escrito encima la repetiría.
+  const variasEmpresas = (sesion?.empresas.length ?? 0) > 1;
 
   return (
     <div className="lateral-menu">
       <div className="lateral-cabeza">
-        <div className="lateral-marca">
-          <MarcaCompacta />
-          <div className="lateral-marca-texto">
-            <span className="lateral-producto">Firma digital</span>
-            <span className="lateral-empresa">
-              {empresaActiva?.nombre ?? (vistaDeTodas ? "Todas las empresas" : "Sin empresa")}
-            </span>
-          </div>
-        </div>
+        <MarcaProducto className="lateral-marca" />
+        {!variasEmpresas && (
+          <span className="lateral-empresa">
+            {empresaActiva?.nombre ?? (vistaDeTodas ? "Todas las empresas" : "Sin empresa")}
+          </span>
+        )}
         <SelectorEmpresa />
       </div>
 
@@ -173,8 +173,7 @@ function Marco({ children }: { children: React.ReactNode }) {
         >
           {menuAbierto ? <X aria-hidden /> : <Menu aria-hidden />}
         </button>
-        <MarcaCompacta />
-        <span className="barra-movil-nombre">Firma digital</span>
+        <MarcaProducto />
       </header>
 
       {/* El diálogo ocupa toda la ventana y la hoja va a la izquierda: un toque fuera de la hoja
@@ -230,14 +229,13 @@ function Consola() {
   // módulos que desaparecen un segundo después.
   if (!sesion && errorSesion) {
     return (
-      <div className="vacio">
-        <h2>No se pudo preparar la consola</h2>
-        <p>{errorSesion}</p>
-        <div className="acciones-centradas">
-          <button type="button" className="boton" onClick={reintentarSesion}>Reintentar</button>
+      <MarcoEntrada titulo="No se pudo preparar la consola">
+        <Aviso tipo="error">{errorSesion}</Aviso>
+        <div className="entrada-acciones">
+          <button type="button" className="boton boton-primario" onClick={reintentarSesion}>Reintentar</button>
           <button type="button" className="boton boton-secundario" onClick={salir}>Volver al inicio de sesión</button>
         </div>
-      </div>
+      </MarcoEntrada>
     );
   }
 
@@ -249,9 +247,9 @@ function Consola() {
         <div className="vacio">
           <h2>Tu cuenta no alcanza ninguna empresa</h2>
           <p>
-            Ninguna de las empresas a las que perteneces en One tiene asignada la app Firma
-            digital. Pide al administrador de la plataforma que se la asigne a tu empresa o que te
-            agregue como miembro de una que ya la tenga.
+            Ninguna de las empresas a las que perteneces en One tiene asignada la app Sign. Pide
+            al administrador de la plataforma que se la asigne a tu empresa o que te agregue como
+            miembro de una que ya la tenga.
           </p>
         </div>
       </Marco>

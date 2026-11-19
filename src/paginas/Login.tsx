@@ -3,9 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import type { FormEvent } from "react";
 import { ErrorDobleFactor } from "../api/cliente";
 import { useSesion } from "../sesion/SesionContexto";
-import { Aviso, Cargando } from "../componentes/Cargando";
+import { Aviso } from "../componentes/Cargando";
 import { SelectorTema } from "../componentes/SelectorTema";
 import { LogoEntrada } from "../componentes/Marca";
+import { PasoEntrada } from "../componentes/MarcoEntrada";
 import { acabaDeSalir, marcarEntradaAutomatica, puedeEntrarSolo, ssoDisponible } from "../api/sso";
 
 export function Login() {
@@ -43,14 +44,15 @@ export function Login() {
     }
   }
 
-  if (entrandoSolo) return <Cargando texto="Conectando con One…" />;
+  // El mismo paso que muestra /sso, a donde se va enseguida: así no cambia la pantalla en medio.
+  if (entrandoSolo) return <PasoEntrada texto="Conectando con One…" />;
 
   return (
     <div className="ingreso">
       <LogoEntrada />
       <form className="ingreso-caja" onSubmit={enviar}>
         <div className="ingreso-marca">
-          <span className="rotulo">Firma digital</span>
+          <span className="rotulo">Sign</span>
           <SelectorTema />
         </div>
 
