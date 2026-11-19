@@ -63,7 +63,7 @@
   --radio-lg: 16px;
 
   /* Marco de la consola: el panel lateral mide lo mismo que el del portal de One. */
-  --ancho-lateral: 16.5rem;
+  --ancho-lateral: 18rem; /* 288 px, como el menú de WorkLog */
   --alto-barra: 60px;
 
   /* Inter para todo (a tamaños grandes usa sus formas Display); JetBrains Mono para los datos
