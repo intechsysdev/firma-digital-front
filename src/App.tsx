@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { FileText, Link2, LogOut, MapPin, Menu, SlidersHorizontal, Smartphone, X } from "lucide-react";
+import { FileText, Link2, Loader2, LogOut, MapPin, Menu, RotateCw, SlidersHorizontal, Smartphone, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { DetalleEntrega } from "./paginas/DetalleEntrega";
 import { Entregas } from "./paginas/Entregas";
@@ -15,8 +15,7 @@ import { Login } from "./paginas/Login";
 import { Vinculos } from "./paginas/Vinculos";
 import { SelectorTema } from "./componentes/SelectorTema";
 import { MarcaProducto } from "./componentes/Marca";
-import { MarcoEntrada } from "./componentes/MarcoEntrada";
-import { Aviso, Cargando } from "./componentes/Cargando";
+import { AvisoEntrada, MarcoEntrada } from "./componentes/MarcoEntrada";
 import { TODAS_LAS_EMPRESAS, useSesion } from "./sesion/SesionContexto";
 
 function SelectorEmpresa() {
@@ -219,40 +218,58 @@ export default function App() {
 
 function Consola() {
   const {
-    autenticado, sesion, errorSesion, reintentarSesion, empresaActiva, esAdministradorPlataforma, faltaElegirEmpresa,
-    salir,
+    autenticado, correo, sesion, errorSesion, reintentarSesion, empresaActiva, esAdministradorPlataforma,
+    faltaElegirEmpresa, salir,
   } = useSesion();
 
   if (!autenticado) return <Login />;
 
   // Se espera a saber quién es antes de pintar: dibujar la navegación sin los permisos mostraría
   // módulos que desaparecen un segundo después.
+  // Las pantallas de antes de la consola son las de WorkLog: error al cargar el perfil, la espera
+  // y la cuenta sin acceso.
   if (!sesion && errorSesion) {
     return (
-      <MarcoEntrada titulo="No se pudo preparar la consola">
-        <Aviso tipo="error">{errorSesion}</Aviso>
+      <MarcoEntrada titulo="No pudimos cargar tu perfil" descripcion={correo}>
+        <AvisoEntrada>{errorSesion}</AvisoEntrada>
         <div className="entrada-acciones">
-          <button type="button" className="boton boton-primario" onClick={reintentarSesion}>Reintentar</button>
-          <button type="button" className="boton boton-secundario" onClick={salir}>Volver al inicio de sesión</button>
+          <button type="button" className="boton boton-primario" onClick={reintentarSesion}>
+            <RotateCw aria-hidden />
+            Reintentar
+          </button>
+          <button type="button" className="boton boton-fantasma" onClick={salir}>
+            <LogOut aria-hidden />
+            Salir
+          </button>
         </div>
       </MarcoEntrada>
     );
   }
 
-  if (!sesion) return <Cargando texto="Preparando la consola…" />;
+  if (!sesion) {
+    return (
+      <div className="entrada" role="status">
+        <Loader2 className="entrada-girador" aria-hidden />
+        <span className="solo-lector">Cargando tu perfil</span>
+      </div>
+    );
+  }
 
   if (sesion.empresas.length === 0) {
     return (
-      <Marco>
-        <div className="vacio">
-          <h2>Tu cuenta no alcanza ninguna empresa</h2>
-          <p>
-            Ninguna de las empresas a las que perteneces en One tiene asignada la app Sign. Pide
-            al administrador de la plataforma que se la asigne a tu empresa o que te agregue como
-            miembro de una que ya la tenga.
-          </p>
+      <MarcoEntrada titulo="No tienes acceso a Sign" descripcion={correo}>
+        <AvisoEntrada>
+          Ninguna de las empresas a las que perteneces en One tiene asignada la app Sign. Pide al
+          administrador de la plataforma que se la asigne a tu empresa o que te agregue como miembro
+          de una que ya la tenga.
+        </AvisoEntrada>
+        <div className="entrada-acciones">
+          <button type="button" className="boton boton-fantasma" onClick={salir}>
+            <LogOut aria-hidden />
+            Salir
+          </button>
         </div>
-      </Marco>
+      </MarcoEntrada>
     );
   }
 

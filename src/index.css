@@ -201,10 +201,6 @@ body {
 :root[data-theme="dark"] .solo-claro { display: none; }
 :root[data-theme="dark"] .solo-oscuro { display: block; }
 
-/* Logo horizontal a su ancho mínimo; por debajo de 480px el <picture> pone la marca compacta. */
-.ingreso-logo img { display: block; width: 360px; height: auto; }
-@media (max-width: 479px) { .ingreso-logo img { width: auto; height: 72px; } }
-
 /* ---------- Controles ---------- */
 .boton {
   appearance: none;
@@ -271,43 +267,15 @@ body {
 .tema button[aria-pressed="true"] { background: var(--superficie); color: var(--acento); box-shadow: var(--sombra); }
 .tema svg { width: 15px; height: 15px; display: block; }
 
-/* ---------- Ingreso ---------- */
-.ingreso { min-height: 100dvh; display: grid; place-items: center; align-content: center; gap: 28px; padding: 24px; }
-/* La franja de la guía de marca, arriba de la tarjeta. */
-.ingreso-caja { position: relative; overflow: hidden; }
-.ingreso-caja::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 4px;
-  background: var(--marca-banda);
-}
-
-.ingreso-caja {
-  width: 100%;
-  max-width: 392px;
-  background: var(--superficie);
-  border: 1px solid var(--borde);
-  border-radius: var(--radio-lg);
-  box-shadow: var(--sombra-alta);
-  padding: 36px 34px 32px;
-  display: flex;
-  flex-direction: column;
-}
-.ingreso-marca { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 22px; }
-.ingreso h1 { font-size: 27px; }
-.ingreso-sub { margin: 5px 0 20px; color: var(--tinta-suave); font-size: 14px; }
-.ingreso label { font-size: 13px; font-weight: 600; color: var(--tinta-media); margin-top: 14px; margin-bottom: 5px; }
-.ingreso .boton { margin-top: 24px; padding: 11px; }
-.ingreso .ingreso-sso { margin-top: 10px; }
-
 /* ---------- Marco de entrada ---------- */
-/* Las pantallas de paso (elegir empresa, entrar con One, los errores antes de la consola) usan el
-   marco de WorkLog, la base de las apps de INTECHSYS ONE, con sus medidas y sus colores exactos.
-   Por eso aquí los tokens que difieren toman los valores de WorkLog, con la misma regla de tres
-   estados de arriba. El login conserva su diseño y no pasa por aquí. */
+/* Las pantallas sin sesión (login, elegir empresa, entrar con One, los errores antes de la consola)
+   usan el marco de WorkLog, la base de las apps de INTECHSYS ONE, con sus medidas y sus colores
+   exactos. Por eso aquí los tokens que difieren toman los valores de WorkLog, con la misma regla de
+   tres estados de arriba. */
 .entrada {
   --papel: #f5f5f4;
+  --precaucion: #8a4105;
+  --precaucion-tenue: #fef3da;
   --superficie-2: #e8e8e7;
   --borde: #e2e2e1;
   --acento-tenue: #fbe9ee;
@@ -321,6 +289,9 @@ body {
     --tinta-media: #d2d0cc;
     --acento: #ff6b8b;
     --acento-tenue: #3a1620;
+    --accion-activa: #c41d43;
+    --precaucion: #f8c45a;
+    --precaucion-tenue: #3a2b0e;
   }
 }
 :root[data-theme="dark"] .entrada {
@@ -331,6 +302,9 @@ body {
   --tinta-media: #d2d0cc;
   --acento: #ff6b8b;
   --acento-tenue: #3a1620;
+  --accion-activa: #c41d43;
+  --precaucion: #f8c45a;
+  --precaucion-tenue: #3a2b0e;
 }
 
 .entrada {
@@ -369,8 +343,32 @@ body {
    varios van en fila. */
 .entrada .boton { height: 40px; padding: 0 16px; gap: 8px; border-radius: 10px; line-height: 20px; }
 .entrada .boton:not(:disabled):active { transform: translateY(1px); }
-.entrada .aviso { margin: 0; }
+.entrada .boton svg { flex: none; width: 16px; height: 16px; }
+/* El botón principal de la tarjeta, como el tamaño lg de WorkLog. */
+.entrada .boton-grande { height: 44px; padding: 0 20px; font-size: 15px; }
+.entrada .boton .girando { animation: giro 1s linear infinite; }
+.aviso-entrada code { font-family: var(--dato); font-size: .92em; }
+.entrada-enlace { align-self: flex-start; font-weight: 600; color: var(--acento); text-decoration: none; }
+.entrada-enlace:hover { text-decoration: underline; }
+.aviso-entrada {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--precaucion-tenue);
+  color: var(--precaucion);
+  font-size: 14px;
+  line-height: 1.625;
+}
+.aviso-entrada svg { flex: none; width: 16px; height: 16px; margin-top: 2px; }
+.aviso-entrada > div { min-width: 0; }
 .entrada-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Texto solo para lectores de pantalla. */
+.solo-lector { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+/* Mientras se carga el perfil: solo el indicador, centrado, como WorkLog. */
+.entrada-girador { width: 24px; height: 24px; color: var(--acento); animation: giro 1s linear infinite; }
 
 .entrada-espera { display: flex; align-items: center; gap: 12px; line-height: 20px; color: var(--tinta-suave); }
 .entrada-espera svg { flex: none; width: 20px; height: 20px; color: var(--acento); animation: giro 1s linear infinite; }

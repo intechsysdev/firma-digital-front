@@ -1,13 +1,12 @@
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
-import { Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { MarcaProducto } from "./Marca";
 
 /**
- * Marco de las pantallas de paso, fuera de la consola: elegir empresa, entrar con One y los
- * errores antes de llegar a la consola. Es el de WorkLog, la base de las apps de INTECHSYS ONE:
- * la marca centrada arriba, una tarjeta con el título y el contenido, y el pie. El login conserva
- * el suyo.
+ * Marco de las pantallas sin sesión, fuera de la consola: login, elegir empresa, entrar con One y
+ * los errores antes de llegar a la consola. Es el de WorkLog, la base de las apps de INTECHSYS ONE:
+ * la marca centrada arriba, una tarjeta con el título y el contenido, y el pie.
  */
 export function MarcoEntrada({
   titulo,
@@ -43,6 +42,16 @@ export function MarcoEntrada({
         <p className="entrada-pie">INTECHSYS ONE · Sign</p>
       </div>
     </main>
+  );
+}
+
+/** Aviso de error en la tarjeta, como el InlineMessage de WorkLog: ámbar, con el triángulo. */
+export function AvisoEntrada({ children }: { children: ReactNode }) {
+  return (
+    <div className="aviso-entrada" role="alert">
+      <AlertTriangle aria-hidden />
+      <div>{children}</div>
+    </div>
   );
 }
 

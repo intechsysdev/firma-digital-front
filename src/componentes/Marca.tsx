@@ -43,22 +43,3 @@ export function MarcaCompacta() {
     </span>
   );
 }
-
-/**
- * Logo horizontal para el login, que conserva su diseño. En pantallas angostas no cabe a su tamaño mínimo
- * y se cambia por la marca compacta; el cambio lo hace el <picture>, el tamaño lo pone el CSS.
- */
-export function LogoEntrada() {
-  return (
-    <div className="ingreso-logo">
-      <picture className="solo-claro">
-        <source media="(max-width: 479px)" srcSet="/marca/marca.svg" width={545} height={757} />
-        <img src="/marca/logo.svg" alt="INTECHSYS ONE" width={942} height={342} />
-      </picture>
-      <picture className="solo-oscuro">
-        <source media="(max-width: 479px)" srcSet="/marca/marca-oscuro.svg" width={545} height={757} />
-        <img src="/marca/logo-oscuro.svg" alt="INTECHSYS ONE" width={942} height={342} />
-      </picture>
-    </div>
-  );
-}

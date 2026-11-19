@@ -1,99 +1,55 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import type { FormEvent } from "react";
-import { ErrorDobleFactor } from "../api/cliente";
-import { useSesion } from "../sesion/SesionContexto";
-import { Aviso } from "../componentes/Cargando";
-import { SelectorTema } from "../componentes/SelectorTema";
-import { LogoEntrada } from "../componentes/Marca";
-import { PasoEntrada } from "../componentes/MarcoEntrada";
-import { acabaDeSalir, marcarEntradaAutomatica, puedeEntrarSolo, ssoDisponible } from "../api/sso";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { acabaDeSalir, iniciarSso, marcarEntradaAutomatica, puedeEntrarSolo, ssoDisponible } from "../api/sso";
+import { AvisoEntrada, MarcoEntrada } from "../componentes/MarcoEntrada";
 
+/**
+ * Login, el de WorkLog: Sign no tiene cuentas propias, se entra con la de INTECHSYS ONE. One pide
+ * la contraseña y el código de la app, y devuelve aquí con la sesión.
+ */
 export function Login() {
-  const { entrar } = useSesion();
-  const [correo, setCorreo] = useState("");
-  const [clave, setClave] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [enviando, setEnviando] = useState(false);
-  const navigate = useNavigate();
-
-  // Con sesión en One se entra sin pasar por este formulario: es el inicio de sesión único.
+  // Quien llega sin haber salido viene a usar la consola: si tiene sesión en One entra sin
+  // escribir nada. Tras salir, el botón hace que One pregunte con qué cuenta seguir.
   const [entrandoSolo] = useState(puedeEntrarSolo);
+  const [error, setError] = useState<string | null>(null);
+
+  const entrar = (elegirCuenta: boolean) =>
+    iniciarSso(null, elegirCuenta).catch((e: unknown) => {
+      setError(e instanceof Error ? e.message : "No se pudo iniciar la sesión con INTECHSYS ONE.");
+    });
+
   useEffect(() => {
     if (!entrandoSolo) return;
     marcarEntradaAutomatica();
-    navigate("/sso", { replace: true });
-  }, [entrandoSolo, navigate]);
+    void entrar(false);
+  }, [entrandoSolo]);
 
-  async function enviar(evento: FormEvent) {
-    evento.preventDefault();
-    setError(null);
-    setEnviando(true);
-
-    try {
-      await entrar(correo.trim(), clave);
-    } catch (e) {
-      // Con verificación en dos pasos se entra por One, que pide el código de la app.
-      if (e instanceof ErrorDobleFactor && ssoDisponible()) {
-        navigate("/sso", { replace: true });
-        return;
-      }
-      setError(e instanceof Error ? e.message : "No se pudo entrar. Intenta de nuevo.");
-    } finally {
-      setEnviando(false);
-    }
+  if (!ssoDisponible()) {
+    return (
+      <MarcoEntrada titulo="Falta configurar el acceso">
+        <AvisoEntrada>
+          Define <code>VITE_ONE_URL</code> y <code>VITE_ONE_PORTAL_URL</code> para entrar con INTECHSYS ONE.
+        </AvisoEntrada>
+      </MarcoEntrada>
+    );
   }
 
-  // El mismo paso que muestra /sso, a donde se va enseguida: así no cambia la pantalla en medio.
-  if (entrandoSolo) return <PasoEntrada texto="Conectando con One…" />;
-
   return (
-    <div className="ingreso">
-      <LogoEntrada />
-      <form className="ingreso-caja" onSubmit={enviar}>
-        <div className="ingreso-marca">
-          <span className="rotulo">Sign</span>
-          <SelectorTema />
-        </div>
-
-        <h1 className="display">Actas de entrega</h1>
-        <p className="ingreso-sub">Consulta las entregas firmadas desde los equipos.</p>
-
-        {error && <Aviso tipo="error">{error}</Aviso>}
-
-        <label htmlFor="correo">Correo</label>
-        <input
-          id="correo"
-          className="campo"
-          type="email"
-          autoComplete="username"
-          required
-          autoFocus
-          value={correo}
-          onChange={(e) => setCorreo(e.target.value)}
-        />
-
-        <label htmlFor="clave">Contraseña</label>
-        <input
-          id="clave"
-          className="campo"
-          type="password"
-          autoComplete="current-password"
-          required
-          value={clave}
-          onChange={(e) => setClave(e.target.value)}
-        />
-
-        <button type="submit" className="boton boton-primario" disabled={enviando}>
-          {enviando ? "Entrando…" : "Entrar"}
-        </button>
-
-        {/* Con sesión abierta en One no hace falta escribir nada: se entra con esa. Tras salir de
-            la consola, One pregunta antes con qué cuenta seguir. */}
-        {ssoDisponible() && (
-          <Link to={acabaDeSalir() ? "/sso?cuenta=elegir" : "/sso"} className="boton boton-secundario ingreso-sso">Entrar con One</Link>
-        )}
-      </form>
-    </div>
+    <MarcoEntrada
+      titulo={entrandoSolo && !error ? "Conectando con INTECHSYS ONE…" : "Bienvenido a Sign"}
+      descripcion="Entra con tu cuenta de INTECHSYS ONE. Es la misma de las demás aplicaciones de tu empresa."
+    >
+      {error && <AvisoEntrada>{error}</AvisoEntrada>}
+      <button
+        type="button"
+        className="boton boton-primario boton-grande"
+        disabled={entrandoSolo && !error}
+        aria-busy={(entrandoSolo && !error) || undefined}
+        onClick={() => void entrar(acabaDeSalir())}
+      >
+        {entrandoSolo && !error ? <Loader2 className="girando" aria-hidden /> : <ArrowRight aria-hidden />}
+        Entrar con INTECHSYS ONE
+      </button>
+    </MarcoEntrada>
   );
 }
