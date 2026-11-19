@@ -9,7 +9,10 @@ export interface Sesion {
   accessToken: string;
   refreshToken: string;
   correo: string;
-  /** Tenant de One activo. Null mientras no se haya elegido o si solo tiene uno. */
+  /**
+   * Tenant de One activo. Null mientras no se haya elegido; vacío si el administrador de
+   * plataforma eligió ver todas las empresas (no se manda cabecera de empresa).
+   */
   tenantId: string | null;
 }
 

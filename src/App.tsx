@@ -9,16 +9,17 @@ import { NuevaActa } from "./paginas/NuevaActa";
 import { FirmarActa } from "./paginas/FirmarActa";
 import { Geolocalizacion } from "./paginas/Geolocalizacion";
 import { Atributos } from "./paginas/Atributos";
+import { ElegirEmpresa } from "./paginas/ElegirEmpresa";
 import { SsoInicio, SsoRetorno } from "./paginas/Sso";
 import { Login } from "./paginas/Login";
 import { Vinculos } from "./paginas/Vinculos";
 import { SelectorTema } from "./componentes/SelectorTema";
 import { MarcaCompacta } from "./componentes/Marca";
-import { Aviso, Cargando } from "./componentes/Cargando";
-import { useSesion } from "./sesion/SesionContexto";
+import { Cargando } from "./componentes/Cargando";
+import { TODAS_LAS_EMPRESAS, useSesion } from "./sesion/SesionContexto";
 
 function SelectorEmpresa() {
-  const { sesion, empresaActiva, cambiarEmpresa } = useSesion();
+  const { sesion, empresaActiva, esAdministradorPlataforma, cambiarEmpresa } = useSesion();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -36,7 +37,12 @@ function SelectorEmpresa() {
         if (pathname.startsWith("/entregas/")) navigate("/entregas");
       }}
     >
-      <option value="" disabled>Elige una empresa</option>
+      {/* El administrador de plataforma puede volver a la vista de todas, que va sin empresa. */}
+      {esAdministradorPlataforma ? (
+        <option value={TODAS_LAS_EMPRESAS}>Todas las empresas</option>
+      ) : (
+        <option value="" disabled>Elige una empresa</option>
+      )}
       {sesion.empresas.map((empresa) => (
         <option key={empresa.oneTenantId} value={empresa.oneTenantId}>{empresa.nombre}</option>
       ))}
@@ -69,7 +75,7 @@ function EntradaMenu({
  * pantallas angostas; `alElegir` cierra el cajón al tocar una entrada.
  */
 function MenuLateral({ alElegir }: { alElegir?: () => void }) {
-  const { correo, empresaActiva, esAdministradorPlataforma, salir } = useSesion();
+  const { correo, empresaActiva, esAdministradorPlataforma, vistaDeTodas, salir } = useSesion();
 
   return (
     <div className="lateral-menu">
@@ -78,7 +84,9 @@ function MenuLateral({ alElegir }: { alElegir?: () => void }) {
           <MarcaCompacta />
           <div className="lateral-marca-texto">
             <span className="lateral-producto">Firma digital</span>
-            <span className="lateral-empresa">{empresaActiva?.nombre ?? "Sin empresa"}</span>
+            <span className="lateral-empresa">
+              {empresaActiva?.nombre ?? (vistaDeTodas ? "Todas las empresas" : "Sin empresa")}
+            </span>
           </div>
         </div>
         <SelectorEmpresa />
@@ -212,7 +220,8 @@ export default function App() {
 
 function Consola() {
   const {
-    autenticado, sesion, errorSesion, reintentarSesion, empresaActiva, esAdministradorPlataforma, salir,
+    autenticado, sesion, errorSesion, reintentarSesion, empresaActiva, esAdministradorPlataforma, faltaElegirEmpresa,
+    salir,
   } = useSesion();
 
   if (!autenticado) return <Login />;
@@ -249,12 +258,12 @@ function Consola() {
     );
   }
 
+  // Con varias empresas y ninguna elegida no se entra a la consola: se pregunta antes con cuál
+  // trabajar, para no mostrar ni un instante lo de una empresa que no era.
+  if (faltaElegirEmpresa) return <ElegirEmpresa />;
+
   return (
     <Marco>
-      {!empresaActiva && !esAdministradorPlataforma && (
-        <Aviso tipo="info">Elige una empresa en el menú para ver sus actas.</Aviso>
-      )}
-
       <Routes>
         <Route path="/entregas" element={<Entregas />} />
         <Route path="/entregas/:uid" element={<DetalleEntrega />} />

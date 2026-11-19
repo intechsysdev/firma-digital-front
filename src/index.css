@@ -223,6 +223,9 @@ body {
 .boton-secundario { background: var(--superficie); border-color: var(--borde-fuerte); color: var(--tinta); }
 .boton-secundario:not(:disabled):hover { background: var(--superficie-2); border-color: var(--tinta-suave); }
 .boton-chico { padding: 6px 11px; font-size: 13px; }
+/* Acción menor que no debe competir con las de la pantalla, como Salir al elegir empresa. */
+.boton-fantasma { background: transparent; color: var(--tinta-suave); }
+.boton-fantasma:not(:disabled):hover { background: var(--superficie-2); color: var(--tinta); }
 
 .campo {
   font: inherit;
@@ -291,6 +294,58 @@ body {
 .ingreso label { font-size: 13px; font-weight: 600; color: var(--tinta-media); margin-top: 14px; margin-bottom: 5px; }
 .ingreso .boton { margin-top: 24px; padding: 11px; }
 .ingreso .ingreso-sso { margin-top: 10px; }
+.ingreso-pie { margin: 0; font-size: 12px; color: var(--tinta-suave); text-align: center; }
+
+/* ---------- Elegir empresa ---------- */
+/* Paso entre el ingreso y la consola, con el mismo marco. La tarjeta es algo más ancha que la del
+   login: los nombres de empresa son largos. Con muchas empresas crece y se desplaza la página. */
+.elegir-empresa { max-width: 28rem; gap: 22px; }
+/* En el teléfono el relleno de la tarjeta se come el ancho de los nombres, que ya van truncados. */
+@media (max-width: 479px) { .elegir-empresa { padding: 28px 20px 24px; } }
+.elegir-empresa h1 { font-size: 24px; line-height: 1.25; }
+/* El título recibe el foco al aparecer solo para que se anuncie; no es un control. */
+.elegir-empresa h1:focus { outline: none; }
+.elegir-empresa-sub { margin: 6px 0 0; color: var(--tinta-suave); font-size: 15px; line-height: 1.5; }
+.elegir-empresa .boton { margin-top: 0; }
+
+.empresas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+/* La vista de todas no es una empresa más: va al final, separada. */
+.empresas-todas { margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--borde); }
+.empresa-opcion {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  background: var(--superficie);
+  color: var(--tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+.empresa-opcion:hover,
+.empresa-opcion:focus-visible { border-color: var(--acento); background: var(--acento-tenue); }
+.empresa-icono {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--superficie-2);
+  color: var(--tinta-suave);
+}
+.empresa-icono svg { width: 20px; height: 20px; }
+.empresa-texto { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.35; }
+.empresa-nombre,
+.empresa-detalle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.empresa-nombre { font-weight: 600; }
+.empresa-detalle { font-size: 13px; color: var(--tinta-suave); }
+.empresa-flecha { flex: none; width: 16px; height: 16px; color: var(--tinta-suave); }
 
 /* ---------- Marca ---------- */
 /* Marca compacta y, al lado, el nombre del producto como texto (nunca dentro del logo). La

@@ -16,12 +16,23 @@ interface Contexto {
   reintentarSesion: () => void;
   empresaActiva: EmpresaAccesible | null;
   esAdministradorPlataforma: boolean;
+  /** El administrador de plataforma eligió trabajar sin empresa, viendo las de todas. */
+  vistaDeTodas: boolean;
+  /** Alcanza varias empresas y aún no eligió con cuál trabajar: la consola pregunta antes de entrar. */
+  faltaElegirEmpresa: boolean;
   entrar: (correo: string, clave: string) => Promise<void>;
+  /** Acepta TODAS_LAS_EMPRESAS para la vista de todas del administrador de plataforma. */
   cambiarEmpresa: (tenantId: string) => void;
   salir: () => void;
 }
 
 const SesionContexto = createContext<Contexto | null>(null);
+
+/**
+ * Elección del administrador de plataforma que trabaja sin empresa y ve las de todas. Se guarda
+ * como tenant vacío: así las peticiones salen sin la cabecera de empresa y el API no filtra.
+ */
+export const TODAS_LAS_EMPRESAS = "";
 
 export function ProveedorSesion({ children }: { children: ReactNode }) {
   const [correo, setCorreo] = useState<string | null>(() => leerSesion()?.correo ?? null);
@@ -98,9 +109,14 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
         if (!vigente) return;
         setSesion(datos);
 
-        // Con una sola empresa no tiene sentido pedir que la elija.
+        // Vale la que ya venía (la que mandó One al entrar o la de la vez anterior) si sigue al
+        // alcance. Si no, con una sola empresa no tiene sentido pedir que la elija; con varias se
+        // deja sin elegir y la consola pregunta: nunca se elige una a ciegas.
         const guardado = leerSesion()?.tenantId ?? null;
-        const valida = datos.empresas.some((e) => e.oneTenantId === guardado);
+        const valida =
+          datos.empresas.some((e) => e.oneTenantId === guardado) ||
+          // La vista de todas es solo del administrador de plataforma, y con una empresa sobra.
+          (guardado === TODAS_LAS_EMPRESAS && datos.esAdministradorPlataforma && datos.empresas.length > 1);
         const elegida = valida ? guardado : datos.empresas.length === 1 ? datos.empresas[0].oneTenantId : null;
 
         setTenantId(elegida);
@@ -141,6 +157,8 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
 
   const valor = useMemo<Contexto>(() => {
     const empresaActiva = sesion?.empresas.find((e) => e.oneTenantId === tenantId) ?? null;
+    const esAdministradorPlataforma = sesion?.esAdministradorPlataforma ?? false;
+    const vistaDeTodas = !empresaActiva && esAdministradorPlataforma && tenantId === TODAS_LAS_EMPRESAS;
 
     return {
       correo,
@@ -149,7 +167,9 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
       errorSesion,
       reintentarSesion,
       empresaActiva,
-      esAdministradorPlataforma: sesion?.esAdministradorPlataforma ?? false,
+      esAdministradorPlataforma,
+      vistaDeTodas,
+      faltaElegirEmpresa: sesion !== null && sesion.empresas.length > 1 && !empresaActiva && !vistaDeTodas,
       entrar,
       cambiarEmpresa,
       salir,
