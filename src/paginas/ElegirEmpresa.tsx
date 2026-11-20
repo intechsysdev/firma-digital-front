@@ -2,15 +2,8 @@ import { Building2, ChevronRight, Globe, LogOut } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { EmpresaAccesible } from "../api/plataforma";
 import { MarcoEntrada } from "../componentes/MarcoEntrada";
+import { nombreRol } from "../sesion/roles";
 import { TODAS_LAS_EMPRESAS, useSesion } from "../sesion/SesionContexto";
-
-/** One emite el rol con su nombre interno; aquí se muestra como lo nombra el portal. */
-const ROLES: Record<string, string> = {
-  Owner: "Propietario",
-  Admin: "Administrador",
-  Member: "Miembro",
-  Viewer: "Observador",
-};
 
 /**
  * Segunda línea de cada empresa: el rol del usuario en ella o, si no tiene (el administrador de
@@ -18,7 +11,7 @@ const ROLES: Record<string, string> = {
  * parecido.
  */
 function detalle(empresa: EmpresaAccesible): string | null {
-  if (empresa.rol) return `Rol en ONE: ${ROLES[empresa.rol] ?? empresa.rol}`;
+  if (empresa.rol) return `Rol en ONE: ${nombreRol(empresa.rol)}`;
   return empresa.slug || null;
 }
 
@@ -51,7 +44,7 @@ function Opcion({
  * Paso entre el inicio de sesión y la consola cuando el usuario alcanza varias empresas y ninguna
  * está elegida. No se entra a la consola hasta elegir: entrar con la primera de la lista mostraría
  * las actas de una empresa que quizá no era la que buscaba. La elección queda guardada igual que
- * la del selector del menú, con el que se cambia después.
+ * la del menú de la cuenta, con el que se cambia después.
  */
 export function ElegirEmpresa() {
   const { sesion, esAdministradorPlataforma, cambiarEmpresa, salir } = useSesion();

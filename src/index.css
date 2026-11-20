@@ -439,8 +439,58 @@ body {
 .marca-producto-descripcion { font-size: 12px; line-height: 1.25; color: var(--tinta-suave); }
 
 /* ---------- Marco: menú lateral ---------- */
-/* El mismo panel que el portal de One. En escritorio va fijo a la izquierda y solo se desplaza el
-   contenido; por debajo de 1024px queda una barra arriba y el panel se abre como cajón. */
+/* El panel de WorkLog, la base de las apps de INTECHSYS ONE, con sus medidas y sus colores exactos:
+   la marca, las secciones y, al pie, el menú de la cuenta. En escritorio va fijo a la izquierda y
+   solo se desplaza el contenido; por debajo de 1024px queda una barra arriba y el panel se abre
+   como cajón. Los colores son los de WorkLog, con la misma regla de tres estados de arriba. */
+.lateral,
+.cajon-hoja {
+  --wl-elevada: #ffffff;
+  --wl-flotante: #ffffff;
+  --wl-hundida: #f5f5f4;
+  --wl-linea: #e2e2e1;
+  --wl-tinta: #1e1f1d;
+  --wl-tinta-media: #3c3c3b;
+  --wl-tinta-suave: #5a5958;
+  --wl-acento: #af1839;
+  --wl-acento-tenue: #fbe9ee;
+  --wl-critico: #751326;
+  --wl-critico-tenue: #fbe9ee;
+  --wl-sombra: 0 4px 8px hsl(30 6% 15% / .08), 0 24px 64px -12px hsl(30 6% 15% / .28);
+  /* La marca del producto toma de aquí su separador. */
+  --borde: var(--wl-linea);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) :is(.lateral, .cajon-hoja) {
+    --wl-elevada: #222220;
+    --wl-flotante: #2a2a28;
+    --wl-hundida: #1c1c1b;
+    --wl-linea: #353533;
+    --wl-tinta: #f3f2ef;
+    --wl-tinta-media: #d2d0cc;
+    --wl-tinta-suave: #a3a19d;
+    --wl-acento: #ff6b8b;
+    --wl-acento-tenue: #3a1620;
+    --wl-critico: #ff7c97;
+    --wl-critico-tenue: #3d1520;
+    --wl-sombra: 0 4px 8px rgb(0 0 0 / .08), 0 24px 64px -12px rgb(0 0 0 / .28);
+  }
+}
+:root[data-theme="dark"] :is(.lateral, .cajon-hoja) {
+  --wl-elevada: #222220;
+  --wl-flotante: #2a2a28;
+  --wl-hundida: #1c1c1b;
+  --wl-linea: #353533;
+  --wl-tinta: #f3f2ef;
+  --wl-tinta-media: #d2d0cc;
+  --wl-tinta-suave: #a3a19d;
+  --wl-acento: #ff6b8b;
+  --wl-acento-tenue: #3a1620;
+  --wl-critico: #ff7c97;
+  --wl-critico-tenue: #3d1520;
+  --wl-sombra: 0 4px 8px rgb(0 0 0 / .08), 0 24px 64px -12px rgb(0 0 0 / .28);
+}
+
 .lateral { display: none; }
 @media (min-width: 1024px) {
   .lateral {
@@ -449,8 +499,8 @@ body {
     inset: 0 auto 0 0;
     z-index: 10;
     width: var(--ancho-lateral);
-    background: var(--superficie);
-    border-right: 1px solid var(--borde);
+    background: var(--wl-elevada);
+    border-right: 1px solid var(--wl-linea);
   }
   .consola { margin-left: var(--ancho-lateral); }
 }
@@ -460,71 +510,152 @@ body {
   flex-direction: column;
   gap: 24px;
   height: 100%;
-  padding: 16px 12px;
-  overflow-y: auto;
+  padding: 24px 16px;
+  color: var(--wl-tinta);
+  font-size: 14px;
+  line-height: 1.5;
 }
+.lateral-marca { padding: 0 4px; }
 
-/* La marca arriba y, debajo, la empresa activa y su selector. */
-.lateral-cabeza { display: flex; flex-direction: column; gap: 12px; }
-.lateral-marca { padding: 4px 12px; }
-.lateral-cabeza .lateral-empresa { padding: 0 12px; }
-.lateral-empresa,
-.lateral-usuario { font-size: 12px; color: var(--tinta-suave); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-.lateral-nav { display: flex; flex-direction: column; gap: 24px; }
-.lateral-grupo { display: flex; flex-direction: column; gap: 4px; }
+/* Las secciones se desplazan si no caben; el menú de la cuenta queda siempre al pie. */
+.lateral-cuerpo { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: 16px; }
+.lateral-nav { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: 18px; overflow-y: auto; }
+.lateral-grupo { display: flex; flex-direction: column; gap: 2px; }
 .lateral-titulo {
   margin: 0;
-  padding: 0 12px 4px;
+  padding: 0 12px 6px;
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: .08em;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: .1em;
   text-transform: uppercase;
-  color: var(--tinta-suave);
+  color: var(--wl-tinta-suave);
 }
 
 .lateral-entrada {
-  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--wl-tinta-media);
+  text-decoration: none;
+  transition: background-color .15s cubic-bezier(.4, 0, .2, 1), color .15s cubic-bezier(.4, 0, .2, 1);
+}
+.lateral-entrada svg { flex: none; width: 16px; height: 16px; opacity: .8; }
+.lateral-entrada:hover { background: var(--wl-hundida); color: var(--wl-tinta); }
+.lateral-entrada.active { background: var(--wl-acento-tenue); font-weight: 600; color: var(--wl-acento); }
+
+.lateral-pie { padding-top: 12px; border-top: 1px solid var(--wl-linea); }
+
+/* ---------- Menú de la cuenta (el UserMenu de WorkLog) ---------- */
+.menu-usuario { position: relative; }
+.menu-usuario-boton {
+  appearance: none;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 13.5px;
-  font-weight: 500;
-  line-height: 1.4;
-  color: var(--tinta-suave);
-  text-decoration: none;
-  transition: background .15s ease, color .15s ease;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--wl-tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color .15s cubic-bezier(.4, 0, .2, 1), border-color .15s cubic-bezier(.4, 0, .2, 1);
 }
-.lateral-entrada svg { flex: none; width: 18px; height: 18px; }
-.lateral-entrada:hover { background: var(--superficie-2); color: var(--tinta); }
-.lateral-entrada.active { background: var(--acento-tenue); color: var(--acento); }
-/* La activa se marca también en forma, no solo en color: una barrita pegada al borde izquierdo. */
-.lateral-entrada.active::before {
-  content: "";
+.menu-usuario-boton:hover,
+.menu-usuario-boton[aria-expanded="true"] { border-color: var(--wl-linea); background: var(--wl-hundida); }
+.menu-usuario-boton > svg { flex: none; width: 16px; height: 16px; color: var(--wl-tinta-suave); }
+.menu-usuario-avatar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #af1839;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  letter-spacing: -.025em;
+}
+.menu-usuario-texto { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.menu-usuario-nombre,
+.menu-usuario-detalle { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.menu-usuario-nombre { font-size: 14px; font-weight: 600; line-height: 20px; color: var(--wl-tinta); }
+.menu-usuario-detalle { font-size: 12px; font-weight: 400; line-height: 18px; color: var(--wl-tinta-suave); }
+
+/* Se abre hacia arriba, a todo el ancho del botón. */
+.menu-usuario-lista {
   position: absolute;
   left: 0;
-  top: 50%;
-  width: 2px;
-  height: 20px;
-  margin-top: -10px;
-  border-radius: 0 2px 2px 0;
-  background: var(--acento);
+  bottom: 100%;
+  z-index: 40;
+  width: 100%;
+  min-width: 224px;
+  margin-bottom: 8px;
+  padding: 4px;
+  overflow: hidden;
+  border: 1px solid var(--wl-linea);
+  border-radius: 12px;
+  background: var(--wl-flotante);
+  box-shadow: var(--wl-sombra);
+  animation: menu-usuario-entra .14s cubic-bezier(.16, 1, .3, 1);
 }
-
-.lateral-pie {
-  margin-top: auto;
+@keyframes menu-usuario-entra { from { opacity: 0; transform: translateY(4px) scale(.98); } }
+@media (prefers-reduced-motion: reduce) { .menu-usuario-lista { animation: none; } }
+.menu-usuario-cabeza { padding: 8px 10px; }
+.menu-usuario-lista hr { height: 1px; margin: 4px 0; border: 0; background: var(--wl-linea); }
+.menu-usuario-etiqueta {
+  margin: 0;
+  padding: 6px 10px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--wl-tinta-suave);
+}
+.menu-usuario-opcion {
+  appearance: none;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 10px;
-  padding: 14px 12px 0;
-  border-top: 1px solid var(--borde);
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--wl-tinta-media);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition: background-color .15s cubic-bezier(.4, 0, .2, 1), color .15s cubic-bezier(.4, 0, .2, 1);
 }
-.lateral-acciones { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-
-/* El selector de empresa solo aparece cuando hay más de una; en el menú va a todo el ancho. */
-.selector-empresa { width: 100%; font-size: 13px; padding: 7px 9px; }
+.menu-usuario-opcion svg { flex: none; width: 16px; height: 16px; }
+.menu-usuario-opcion span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.menu-usuario-opcion:hover,
+.menu-usuario-opcion:focus { background: var(--wl-hundida); color: var(--wl-tinta); }
+.menu-usuario-opcion[aria-current="true"] { font-weight: 600; color: var(--wl-tinta); }
+.menu-usuario-opcion[aria-current="true"] svg { color: var(--wl-acento); }
+.menu-usuario-peligro,
+.menu-usuario-peligro:hover,
+.menu-usuario-peligro:focus { color: var(--wl-critico); }
+.menu-usuario-peligro:hover,
+.menu-usuario-peligro:focus { background: var(--wl-critico-tenue); }
 
 /* ---------- Marco: pantallas angostas ---------- */
 .barra-movil {
@@ -580,8 +711,8 @@ body {
   width: var(--ancho-lateral);
   max-width: calc(100% - 56px);
   height: 100%;
-  background: var(--superficie);
-  border-right: 1px solid var(--borde);
+  background: var(--wl-elevada);
+  border-right: 1px solid var(--wl-linea);
   box-shadow: var(--sombra-alta);
 }
 .cajon[open] .cajon-hoja { animation: cajon-entra .22s cubic-bezier(.16, 1, .3, 1); }

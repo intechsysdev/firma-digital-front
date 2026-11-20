@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { FileText, Link2, Loader2, LogOut, MapPin, Menu, RotateCw, SlidersHorizontal, Smartphone, X } from "lucide-react";
+import { FileText, Globe, Link2, Loader2, LogOut, MapPin, Menu, RotateCw, SlidersHorizontal, Smartphone, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { DetalleEntrega } from "./paginas/DetalleEntrega";
 import { Entregas } from "./paginas/Entregas";
@@ -13,42 +13,13 @@ import { ElegirEmpresa } from "./paginas/ElegirEmpresa";
 import { SsoInicio, SsoRetorno } from "./paginas/Sso";
 import { Login } from "./paginas/Login";
 import { Vinculos } from "./paginas/Vinculos";
-import { SelectorTema } from "./componentes/SelectorTema";
+import { MenuUsuario } from "./componentes/MenuUsuario";
+import type { OpcionEmpresa } from "./componentes/MenuUsuario";
 import { MarcaProducto } from "./componentes/Marca";
 import { AvisoEntrada, MarcoEntrada } from "./componentes/MarcoEntrada";
 import { TODAS_LAS_EMPRESAS, useSesion } from "./sesion/SesionContexto";
-
-function SelectorEmpresa() {
-  const { sesion, empresaActiva, esAdministradorPlataforma, cambiarEmpresa } = useSesion();
-  const navigate = useNavigate();
-  const { pathname } = useLocation();
-
-  // Con una sola empresa el selector sobra: ocupa espacio y no ofrece ninguna elección.
-  if (!sesion || sesion.empresas.length < 2) return null;
-
-  return (
-    <select
-      className="campo selector-empresa"
-      aria-label="Empresa activa"
-      value={empresaActiva?.oneTenantId ?? ""}
-      onChange={(e) => {
-        cambiarEmpresa(e.target.value);
-        // El acta abierta es de la empresa anterior: con la nueva ya no se puede ver.
-        if (pathname.startsWith("/entregas/")) navigate("/entregas");
-      }}
-    >
-      {/* El administrador de plataforma puede volver a la vista de todas, que va sin empresa. */}
-      {esAdministradorPlataforma ? (
-        <option value={TODAS_LAS_EMPRESAS}>Todas las empresas</option>
-      ) : (
-        <option value="" disabled>Elige una empresa</option>
-      )}
-      {sesion.empresas.map((empresa) => (
-        <option key={empresa.oneTenantId} value={empresa.oneTenantId}>{empresa.nombre}</option>
-      ))}
-    </select>
-  );
-}
+import { nombreRol } from "./sesion/roles";
+import { useTema } from "./tema/TemaContexto";
 
 function EntradaMenu({
   a,
@@ -71,56 +42,70 @@ function EntradaMenu({
 }
 
 /**
- * Contenido del menú lateral. Es el mismo en el panel fijo de escritorio y en el cajón de las
+ * Contenido del menú lateral, el mismo de WorkLog: la marca, las secciones y, al pie, el menú de la
+ * cuenta (empresa, tema y salida). Es el mismo en el panel fijo de escritorio y en el cajón de las
  * pantallas angostas; `alElegir` cierra el cajón al tocar una entrada.
  */
 function MenuLateral({ alElegir }: { alElegir?: () => void }) {
-  const { sesion, correo, empresaActiva, esAdministradorPlataforma, vistaDeTodas, salir } = useSesion();
-  // Con varias empresas el selector ya muestra la activa: el nombre escrito encima la repetiría.
+  const { sesion, correo, empresaActiva, esAdministradorPlataforma, vistaDeTodas, cambiarEmpresa, salir } = useSesion();
+  const { oscuro, alternar } = useTema();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  // Con una sola empresa no hay nada que elegir. El administrador de plataforma puede además
+  // volver a la vista de todas, que va sin empresa.
   const variasEmpresas = (sesion?.empresas.length ?? 0) > 1;
+  const empresas: OpcionEmpresa[] = !variasEmpresas ? [] : [
+    ...(esAdministradorPlataforma ? [{ id: TODAS_LAS_EMPRESAS, nombre: "Todas las empresas", icono: Globe }] : []),
+    ...(sesion?.empresas ?? []).map((empresa) => ({ id: empresa.oneTenantId, nombre: empresa.nombre })),
+  ];
+  const rol = empresaActiva?.rol
+    ? nombreRol(empresaActiva.rol)
+    : esAdministradorPlataforma ? "Administrador de plataforma" : null;
+  const empresa = empresaActiva?.nombre ?? (vistaDeTodas ? "Todas las empresas" : "Sin empresa");
 
   return (
     <div className="lateral-menu">
-      <div className="lateral-cabeza">
-        <MarcaProducto className="lateral-marca" />
-        {!variasEmpresas && (
-          <span className="lateral-empresa">
-            {empresaActiva?.nombre ?? (vistaDeTodas ? "Todas las empresas" : "Sin empresa")}
-          </span>
-        )}
-        <SelectorEmpresa />
-      </div>
+      <MarcaProducto className="lateral-marca" />
 
-      <nav className="lateral-nav" aria-label="Principal">
-        <div className="lateral-grupo">
-          {/* Con un solo grupo el título sobra; solo separa cuando aparece el de plataforma. */}
-          {esAdministradorPlataforma && <p className="lateral-titulo">Operación</p>}
-          <EntradaMenu a="/entregas" icono={FileText} alElegir={alElegir}>Actas</EntradaMenu>
-          {empresaActiva && <EntradaMenu a="/equipos" icono={Smartphone} alElegir={alElegir}>Equipos</EntradaMenu>}
-          <EntradaMenu a="/geolocalizacion" icono={MapPin} alElegir={alElegir}>Geolocalización</EntradaMenu>
-          {empresaActiva && (
-            <EntradaMenu a="/atributos" icono={SlidersHorizontal} alElegir={alElegir}>Atributos</EntradaMenu>
-          )}
-        </div>
-
-        {/* Los vínculos con One son cosa de plataforma: las empresas y sus usuarios se
-            administran en el portal de One, no aquí. */}
-        {esAdministradorPlataforma && (
+      <div className="lateral-cuerpo">
+        <nav className="lateral-nav" aria-label="Principal">
           <div className="lateral-grupo">
-            <p className="lateral-titulo">Plataforma</p>
-            <EntradaMenu a="/vinculos" icono={Link2} alElegir={alElegir}>Vínculos</EntradaMenu>
+            <p className="lateral-titulo">Operación</p>
+            <EntradaMenu a="/entregas" icono={FileText} alElegir={alElegir}>Actas</EntradaMenu>
+            {empresaActiva && <EntradaMenu a="/equipos" icono={Smartphone} alElegir={alElegir}>Equipos</EntradaMenu>}
+            <EntradaMenu a="/geolocalizacion" icono={MapPin} alElegir={alElegir}>Geolocalización</EntradaMenu>
+            {empresaActiva && (
+              <EntradaMenu a="/atributos" icono={SlidersHorizontal} alElegir={alElegir}>Atributos</EntradaMenu>
+            )}
           </div>
-        )}
-      </nav>
 
-      <div className="lateral-pie">
-        <span className="lateral-usuario" title={correo ?? undefined}>{correo}</span>
-        <div className="lateral-acciones">
-          <SelectorTema />
-          <button type="button" className="boton boton-secundario boton-chico" onClick={salir}>
-            <LogOut size={15} aria-hidden />
-            Salir
-          </button>
+          {/* Los vínculos con One son cosa de plataforma: las empresas y sus usuarios se
+              administran en el portal de One, no aquí. */}
+          {esAdministradorPlataforma && (
+            <div className="lateral-grupo">
+              <p className="lateral-titulo">Plataforma</p>
+              <EntradaMenu a="/vinculos" icono={Link2} alElegir={alElegir}>Vínculos</EntradaMenu>
+            </div>
+          )}
+        </nav>
+
+        <div className="lateral-pie">
+          <MenuUsuario
+            nombre={sesion?.nombre || correo || "Tu cuenta"}
+            correo={correo}
+            detalle={rol ? `${rol} · ${empresa}` : empresa}
+            empresas={empresas}
+            empresaActiva={empresaActiva?.oneTenantId ?? (vistaDeTodas ? TODAS_LAS_EMPRESAS : null)}
+            alElegirEmpresa={(id) => {
+              cambiarEmpresa(id);
+              // El acta abierta es de la empresa anterior: con la nueva ya no se puede ver.
+              if (pathname.startsWith("/entregas/")) navigate("/entregas");
+            }}
+            oscuro={oscuro}
+            alAlternarTema={alternar}
+            alSalir={salir}
+          />
         </div>
       </div>
     </div>
@@ -134,8 +119,7 @@ function Marco({ children }: { children: React.ReactNode }) {
   const botonMenu = useRef<HTMLButtonElement>(null);
 
   // El cajón es un <dialog> modal: el navegador deja inerte el resto de la página, atrapa el foco
-  // y lo cierra con Escape. showModal enfoca el primer control, que puede ser el selector de
-  // empresa; el foco va a la primera entrada del menú.
+  // y lo cierra con Escape. El foco va a la primera entrada del menú.
   const abrirMenu = () => {
     cajon.current?.showModal();
     setMenuAbierto(true);
