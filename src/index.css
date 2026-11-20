@@ -64,7 +64,7 @@
 
   /* Marco de la consola: el panel lateral mide lo mismo que el del portal de One. */
   --ancho-lateral: 18rem; /* 288 px, como el menú de WorkLog */
-  --alto-barra: 60px;
+  --alto-barra: 69px; /* la barra de arriba en pantallas angostas, como la de WorkLog */
 
   /* Inter para todo (a tamaños grandes usa sus formas Display); JetBrains Mono para los datos
      técnicos. Los nombres de las variables se conservan: --display son los títulos. */
@@ -440,15 +440,15 @@ body {
 
 /* ---------- Marco: menú lateral ---------- */
 /* El panel de WorkLog, la base de las apps de INTECHSYS ONE, con sus medidas y sus colores exactos:
-   la marca, las secciones y, al pie, el menú de la cuenta. En escritorio va fijo a la izquierda y
-   solo se desplaza el contenido; por debajo de 1024px queda una barra arriba y el panel se abre
-   como cajón. Los colores son los de WorkLog, con la misma regla de tres estados de arriba. */
-.lateral,
-.cajon-hoja {
+   la marca, las secciones y, al pie, el menú de la cuenta. Desde 901px va fijo a la izquierda y
+   solo se desplaza el contenido; por debajo es la barra de arriba, y el botón despliega el panel
+   debajo de ella. Los colores son los de WorkLog, con la misma regla de tres estados de arriba. */
+.lateral {
   --wl-elevada: #ffffff;
   --wl-flotante: #ffffff;
   --wl-hundida: #f5f5f4;
   --wl-linea: #e2e2e1;
+  --wl-linea-fuerte: #c9c9c8;
   --wl-tinta: #1e1f1d;
   --wl-tinta-media: #3c3c3b;
   --wl-tinta-suave: #5a5958;
@@ -461,11 +461,12 @@ body {
   --borde: var(--wl-linea);
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) :is(.lateral, .cajon-hoja) {
+  :root:not([data-theme="light"]) .lateral {
     --wl-elevada: #222220;
     --wl-flotante: #2a2a28;
     --wl-hundida: #1c1c1b;
     --wl-linea: #353533;
+    --wl-linea-fuerte: #4d4c4a;
     --wl-tinta: #f3f2ef;
     --wl-tinta-media: #d2d0cc;
     --wl-tinta-suave: #a3a19d;
@@ -476,11 +477,12 @@ body {
     --wl-sombra: 0 4px 8px rgb(0 0 0 / .08), 0 24px 64px -12px rgb(0 0 0 / .28);
   }
 }
-:root[data-theme="dark"] :is(.lateral, .cajon-hoja) {
+:root[data-theme="dark"] .lateral {
   --wl-elevada: #222220;
   --wl-flotante: #2a2a28;
   --wl-hundida: #1c1c1b;
   --wl-linea: #353533;
+  --wl-linea-fuerte: #4d4c4a;
   --wl-tinta: #f3f2ef;
   --wl-tinta-media: #d2d0cc;
   --wl-tinta-suave: #a3a19d;
@@ -491,31 +493,76 @@ body {
   --wl-sombra: 0 4px 8px rgb(0 0 0 / .08), 0 24px 64px -12px rgb(0 0 0 / .28);
 }
 
-.lateral { display: none; }
-@media (min-width: 1024px) {
+.lateral {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  background: var(--wl-elevada);
+  color: var(--wl-tinta);
+  font-size: 14px;
+  line-height: 1.5;
+}
+/* El botón que despliega el panel: solo en pantallas angostas. */
+.lateral-boton {
+  appearance: none;
+  flex: none;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: auto;
+  padding: 0;
+  border: 1px solid var(--wl-linea-fuerte);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--wl-tinta);
+  cursor: pointer;
+}
+.lateral-boton svg { width: 20px; height: 20px; }
+@media (max-width: 900px) {
+  .lateral { padding: 12px 16px; border-bottom: 1px solid var(--wl-linea); }
+  .lateral-boton { display: flex; }
+  .lateral-cuerpo { max-height: calc(100dvh - 4.5rem); padding-top: 16px; }
+  .lateral-cuerpo.lateral-plegado { display: none; }
+}
+@media (min-width: 901px) {
   .lateral {
-    display: block;
     position: fixed;
     inset: 0 auto 0 0;
-    z-index: 10;
     width: var(--ancho-lateral);
-    background: var(--wl-elevada);
+    gap: 24px;
+    padding: 24px 16px;
     border-right: 1px solid var(--wl-linea);
   }
   .consola { margin-left: var(--ancho-lateral); }
 }
 
-.lateral-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  height: 100%;
-  padding: 24px 16px;
-  color: var(--wl-tinta);
+.lateral-cabeza { display: flex; align-items: center; gap: 12px; padding: 0 4px; }
+
+/* Enlace para saltar el menú con el teclado: solo se ve al recibir el foco. */
+.saltar { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.saltar:focus {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 50;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  clip: auto;
+  border-radius: 10px;
+  background: #af1839;
+  color: #ffffff;
   font-size: 14px;
+  font-weight: 600;
   line-height: 1.5;
+  text-decoration: none;
 }
-.lateral-marca { padding: 0 4px; }
 
 /* Las secciones se desplazan si no caben; el menú de la cuenta queda siempre al pie. */
 .lateral-cuerpo { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: 16px; }
@@ -604,7 +651,7 @@ body {
   min-width: 224px;
   margin-bottom: 8px;
   padding: 4px;
-  overflow: hidden;
+  overflow: hidden auto;
   border: 1px solid var(--wl-linea);
   border-radius: 12px;
   background: var(--wl-flotante);
@@ -657,73 +704,10 @@ body {
 .menu-usuario-peligro:hover,
 .menu-usuario-peligro:focus { background: var(--wl-critico-tenue); }
 
-/* ---------- Marco: pantallas angostas ---------- */
-.barra-movil {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: var(--alto-barra);
-  padding: 0 16px 0 10px;
-  background: var(--superficie);
-  border-bottom: 1px solid var(--borde);
-}
-@media (min-width: 1024px) { .barra-movil { display: none; } }
-
-.boton-menu {
-  appearance: none;
-  display: inline-grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--tinta-media);
-  cursor: pointer;
-  transition: background .15s ease, color .15s ease;
-}
-.boton-menu:hover { background: var(--superficie-2); color: var(--tinta); }
-.boton-menu svg { width: 20px; height: 20px; }
-
-/* El cajón es un <dialog> modal que ocupa toda la ventana: la hoja va a la izquierda y el resto
-   deja ver el fondo oscurecido. Sin anular el estilo del navegador saldría centrado y con borde. */
-.cajon {
-  inset: 0;
-  width: auto;
-  height: auto;
-  max-width: none;
-  max-height: none;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--tinta);
-  overflow: hidden;
-  /* Que deslizar el dedo sobre el menú no desplace la página de atrás. */
-  overscroll-behavior: contain;
-}
-.cajon::backdrop { background: rgb(30 31 29 / .55); overflow: hidden; overscroll-behavior: contain; }
-.cajon-hoja {
-  width: var(--ancho-lateral);
-  max-width: calc(100% - 56px);
-  height: 100%;
-  background: var(--wl-elevada);
-  border-right: 1px solid var(--wl-linea);
-  box-shadow: var(--sombra-alta);
-}
-.cajon[open] .cajon-hoja { animation: cajon-entra .22s cubic-bezier(.16, 1, .3, 1); }
-.cajon[open]::backdrop { animation: cajon-fondo .22s ease; }
-@keyframes cajon-entra { from { transform: translateX(-100%); } }
-@keyframes cajon-fondo { from { opacity: 0; } }
-
 /* El ancho que manda en las pantallas es el del contenido, no el de la ventana: con el panel
    lateral, una ventana de 1100px le deja menos de 800px. Por eso las rejillas de dos columnas
    (detalle del acta, mapa con detalle) preguntan al contenedor y no a la ventana. */
-.contenido { max-width: 1280px; margin: 0 auto; padding: 28px 24px 72px; container-type: inline-size; }
+.contenido { max-width: 1280px; margin: 0 auto; padding: 28px 24px 72px; container-type: inline-size; outline: none; }
 
 .cabecera-seccion { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px 20px; margin-bottom: 20px; }
 /* En un teléfono el título y sus acciones no siempre caben en una fila: las acciones bajan en vez
@@ -1006,7 +990,7 @@ object.marco-pdf > .vacio { padding: 48px 24px; }
 
 /* Se queda a la vista al bajar por la tabla: bajo la barra angosta, o arriba con el panel lateral. */
 .geo-detalle { position: sticky; top: calc(var(--alto-barra) + 16px); }
-@media (min-width: 1024px) { .geo-detalle { top: 24px; } }
+@media (min-width: 901px) { .geo-detalle { top: 24px; } }
 .geo-titulo { font-size: 19px; }
 .geo-grupo { font-size: 12px; text-align: right; }
 .geo-recorrido { display: flex; align-items: flex-end; gap: 10px; margin-top: 18px; flex-wrap: wrap; }

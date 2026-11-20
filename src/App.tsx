@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { FileText, Globe, Link2, Loader2, LogOut, MapPin, Menu, RotateCw, SlidersHorizontal, Smartphone, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -42,15 +42,17 @@ function EntradaMenu({
 }
 
 /**
- * Contenido del menú lateral, el mismo de WorkLog: la marca, las secciones y, al pie, el menú de la
- * cuenta (empresa, tema y salida). Es el mismo en el panel fijo de escritorio y en el cajón de las
- * pantallas angostas; `alElegir` cierra el cajón al tocar una entrada.
+ * Marco de la consola, el mismo de WorkLog (AppShell): el panel con la marca, las secciones y, al
+ * pie, el menú de la cuenta (empresa, tema y salida). Desde 901 px va fijo a la izquierda; por
+ * debajo es la barra de arriba, y el botón despliega el panel debajo de ella.
  */
-function MenuLateral({ alElegir }: { alElegir?: () => void }) {
+function Marco({ children }: { children: React.ReactNode }) {
   const { sesion, correo, empresaActiva, esAdministradorPlataforma, vistaDeTodas, cambiarEmpresa, salir } = useSesion();
   const { oscuro, alternar } = useTema();
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const [menuAbierto, setMenuAbierto] = useState(false);
+  const cerrarMenu = () => setMenuAbierto(false);
 
   // Con una sola empresa no hay nada que elegir. El administrador de plataforma puede además
   // volver a la vista de todas, que va sin empresa.
@@ -65,123 +67,72 @@ function MenuLateral({ alElegir }: { alElegir?: () => void }) {
   const empresa = empresaActiva?.nombre ?? (vistaDeTodas ? "Todas las empresas" : "Sin empresa");
 
   return (
-    <div className="lateral-menu">
-      <MarcaProducto className="lateral-marca" />
-
-      <div className="lateral-cuerpo">
-        <nav className="lateral-nav" aria-label="Principal">
-          <div className="lateral-grupo">
-            <p className="lateral-titulo">Operación</p>
-            <EntradaMenu a="/entregas" icono={FileText} alElegir={alElegir}>Actas</EntradaMenu>
-            {empresaActiva && <EntradaMenu a="/equipos" icono={Smartphone} alElegir={alElegir}>Equipos</EntradaMenu>}
-            <EntradaMenu a="/geolocalizacion" icono={MapPin} alElegir={alElegir}>Geolocalización</EntradaMenu>
-            {empresaActiva && (
-              <EntradaMenu a="/atributos" icono={SlidersHorizontal} alElegir={alElegir}>Atributos</EntradaMenu>
-            )}
-          </div>
-
-          {/* Los vínculos con One son cosa de plataforma: las empresas y sus usuarios se
-              administran en el portal de One, no aquí. */}
-          {esAdministradorPlataforma && (
-            <div className="lateral-grupo">
-              <p className="lateral-titulo">Plataforma</p>
-              <EntradaMenu a="/vinculos" icono={Link2} alElegir={alElegir}>Vínculos</EntradaMenu>
-            </div>
-          )}
-        </nav>
-
-        <div className="lateral-pie">
-          <MenuUsuario
-            nombre={sesion?.nombre || correo || "Tu cuenta"}
-            correo={correo}
-            detalle={rol ? `${rol} · ${empresa}` : empresa}
-            empresas={empresas}
-            empresaActiva={empresaActiva?.oneTenantId ?? (vistaDeTodas ? TODAS_LAS_EMPRESAS : null)}
-            alElegirEmpresa={(id) => {
-              cambiarEmpresa(id);
-              // El acta abierta es de la empresa anterior: con la nueva ya no se puede ver.
-              if (pathname.startsWith("/entregas/")) navigate("/entregas");
-            }}
-            oscuro={oscuro}
-            alAlternarTema={alternar}
-            alSalir={salir}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Marco({ children }: { children: React.ReactNode }) {
-  const { empresaActiva } = useSesion();
-  const [menuAbierto, setMenuAbierto] = useState(false);
-  const cajon = useRef<HTMLDialogElement>(null);
-  const botonMenu = useRef<HTMLButtonElement>(null);
-
-  // El cajón es un <dialog> modal: el navegador deja inerte el resto de la página, atrapa el foco
-  // y lo cierra con Escape. El foco va a la primera entrada del menú.
-  const abrirMenu = () => {
-    cajon.current?.showModal();
-    setMenuAbierto(true);
-    cajon.current?.querySelector<HTMLElement>(".lateral-entrada")?.focus();
-  };
-  const cerrarMenu = () => cajon.current?.close();
-
-  // Si la ventana se ensancha con el cajón abierto aparece el panel fijo: el cajón sobra, y
-  // abierto dejaría la página inerte aunque no se viera.
-  useEffect(() => {
-    const ancha = window.matchMedia("(min-width: 1024px)");
-    const alCambiar = () => {
-      if (ancha.matches) cajon.current?.close();
-    };
-    ancha.addEventListener("change", alCambiar);
-    return () => ancha.removeEventListener("change", alCambiar);
-  }, []);
-
-  return (
     <div className="consola">
+      <a href="#contenido" className="saltar">Saltar al contenido</a>
+
       <aside className="lateral">
-        <MenuLateral />
-      </aside>
-
-      <header className="barra-movil">
-        <button
-          ref={botonMenu}
-          type="button"
-          className="boton-menu"
-          aria-label={menuAbierto ? "Cerrar menú" : "Abrir menú"}
-          aria-expanded={menuAbierto}
-          aria-controls="menu-lateral"
-          onClick={menuAbierto ? cerrarMenu : abrirMenu}
-        >
-          {menuAbierto ? <X aria-hidden /> : <Menu aria-hidden />}
-        </button>
-        <MarcaProducto />
-      </header>
-
-      {/* El diálogo ocupa toda la ventana y la hoja va a la izquierda: un toque fuera de la hoja
-          cae en el propio diálogo, sobre el fondo oscurecido, y lo cierra. */}
-      <dialog
-        ref={cajon}
-        id="menu-lateral"
-        className="cajon"
-        aria-label="Menú"
-        onClose={() => {
-          setMenuAbierto(false);
-          botonMenu.current?.focus();
-        }}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) cerrarMenu();
-        }}
-      >
-        <div className="cajon-hoja">
-          <MenuLateral alElegir={cerrarMenu} />
+        <div className="lateral-cabeza">
+          <MarcaProducto />
+          <button
+            type="button"
+            className="lateral-boton"
+            aria-expanded={menuAbierto}
+            aria-controls="panel-nav"
+            aria-label={menuAbierto ? "Cerrar el menú" : "Abrir el menú"}
+            onClick={() => setMenuAbierto((valor) => !valor)}
+          >
+            {menuAbierto ? <X aria-hidden /> : <Menu aria-hidden />}
+          </button>
         </div>
-      </dialog>
+
+        {/* En pantallas angostas el panel solo se ve desplegado; desde 901 px, siempre. */}
+        <div id="panel-nav" className={menuAbierto ? "lateral-cuerpo" : "lateral-cuerpo lateral-plegado"}>
+          <nav className="lateral-nav" aria-label="Principal">
+            <div className="lateral-grupo">
+              <p className="lateral-titulo">Operación</p>
+              <EntradaMenu a="/entregas" icono={FileText} alElegir={cerrarMenu}>Actas</EntradaMenu>
+              {empresaActiva && <EntradaMenu a="/equipos" icono={Smartphone} alElegir={cerrarMenu}>Equipos</EntradaMenu>}
+              <EntradaMenu a="/geolocalizacion" icono={MapPin} alElegir={cerrarMenu}>Geolocalización</EntradaMenu>
+              {empresaActiva && (
+                <EntradaMenu a="/atributos" icono={SlidersHorizontal} alElegir={cerrarMenu}>Atributos</EntradaMenu>
+              )}
+            </div>
+
+            {/* Los vínculos con One son cosa de plataforma: las empresas y sus usuarios se
+                administran en el portal de One, no aquí. */}
+            {esAdministradorPlataforma && (
+              <div className="lateral-grupo">
+                <p className="lateral-titulo">Plataforma</p>
+                <EntradaMenu a="/vinculos" icono={Link2} alElegir={cerrarMenu}>Vínculos</EntradaMenu>
+              </div>
+            )}
+          </nav>
+
+          <div className="lateral-pie">
+            <MenuUsuario
+              nombre={sesion?.nombre || correo || "Tu cuenta"}
+              correo={correo}
+              detalle={rol ? `${rol} · ${empresa}` : empresa}
+              empresas={empresas}
+              empresaActiva={empresaActiva?.oneTenantId ?? (vistaDeTodas ? TODAS_LAS_EMPRESAS : null)}
+              alElegirEmpresa={(id) => {
+                cambiarEmpresa(id);
+                // El acta abierta es de la empresa anterior: con la nueva ya no se puede ver.
+                if (pathname.startsWith("/entregas/")) navigate("/entregas");
+              }}
+              oscuro={oscuro}
+              alAlternarTema={alternar}
+              alSalir={salir}
+            />
+          </div>
+        </div>
+      </aside>
 
       {/* La clave es la empresa: al cambiarla, las pantallas se montan de nuevo y piden sus datos
           con la empresa nueva. Sin esto seguían mostrando lo de la anterior hasta recargar. */}
-      <main className="contenido" key={empresaActiva?.oneTenantId ?? "todas"}>{children}</main>
+      <main id="contenido" tabIndex={-1} className="contenido" key={empresaActiva?.oneTenantId ?? "todas"}>
+        {children}
+      </main>
     </div>
   );
 }
