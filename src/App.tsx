@@ -63,7 +63,7 @@ function Marco({ children }: { children: React.ReactNode }) {
   ];
   const rol = empresaActiva?.rol
     ? nombreRol(empresaActiva.rol)
-    : esAdministradorPlataforma ? "Administrador de plataforma" : null;
+    : esAdministradorPlataforma ? "Administrador" : null;
   const empresa = empresaActiva?.nombre ?? (vistaDeTodas ? "Todas las empresas" : "Sin empresa");
 
   return (
